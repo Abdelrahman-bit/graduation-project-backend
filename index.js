@@ -20,6 +20,8 @@ app.use(
 const port = process.env.PORT || 5000;
 const app = express();
 
+app.use('/api/user', userRouter);
+
 app.use(errorHandler);
 app.listen(port, () => {
    console.log(`Server is running on port ${port}`);
