@@ -25,7 +25,7 @@ connectDB();
 const port = process.env.PORT || 5000;
 
 const server = app.listen(port, () => {
-   console.log('Server is up & running');
+   console.log('Server is up & running on port ' + port);
 });
 
 // close the server gracefully (give the server time to finish all the currently pending tasks before ending )
