@@ -1,0 +1,10 @@
+import jwt from 'jsonwebtoken';
+
+// Helper Functions
+
+// Token Generator function
+export const signToken = (userID) => {
+   return jwt.sign({ userID }, process.env.JWT_SECRET_KEY, {
+      expiresIn: TOKEN_EXPIRE,
+   });
+};
