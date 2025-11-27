@@ -7,6 +7,7 @@ import cors from 'cors';
 
 // routes
 import authRouter from './routes/authRoutes.js';
+import userRouter from './routes/userRoutes.js';
 
 //global error controller
 import globalErrorController from './controller/errorControllers.js';
@@ -46,7 +47,7 @@ app.use(
 
 // Routes
 app.use('/api/auth', authRouter);
-app.use('/api/users', authRouter);
+app.use('/api/users', userRouter);
 
 app.use(globalErrorController);
 

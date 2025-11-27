@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import userModel from '../models/usersModel';
-import AppError from '../utils/appError';
+import userModel from '../models/usersModel.js';
+import AppError from '../utils/appError.js';
 
 // authentication middleware that decrypt & check for the user Token
 const auth = async function (req, res, next) {
@@ -17,17 +17,22 @@ const auth = async function (req, res, next) {
       return next(
          new AppError(
             'Not token provided ,please Login / Signup to obtain Token',
-            400
+            401
          )
       );
    }
 
    // 2 decrypt the token & seach for the user id , if not found rise an error
-   const { _id } = jwt.verify(
-      token,
-      process.env.secret_key_used_to_generate_json_web_token_not_to_share
-   );
-   const user = await userModel.findById(_id);
+   let decoded;
+   try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+   } catch (err) {
+      return next(
+         new AppError('Invalid or expired token. Please login again.', 401)
+      );
+   }
+
+   const user = await userModel.findById(decoded.id);
    if (!user) {
       return next(
          new AppError('Account that belongs to this token is Deleted', 400)
