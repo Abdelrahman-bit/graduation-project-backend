@@ -46,6 +46,7 @@ app.use(
 
 // Routes
 app.use('/api/auth', authRouter);
+app.use('/api/users', authRouter);
 
 app.use(globalErrorController);
 

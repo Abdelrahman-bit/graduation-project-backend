@@ -13,7 +13,7 @@ export const signup = catchAsync(async (req, res, next) => {
       role: req.body.role,
    };
    // create & save user to DB
-   const newUser = await UserModel.create(userData);
+   const newUser = await userModel.create(userData);
 
    // generate & send Token
    const token = signToken(newUser._id);
