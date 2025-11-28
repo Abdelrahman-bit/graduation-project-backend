@@ -8,3 +8,5 @@ export const signToken = (userID) => {
       expiresIn: process.env.TOKEN_EXPIRE,
    });
 };
+
+// Email Generator function
