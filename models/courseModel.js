@@ -113,7 +113,7 @@ const courseSchema = new Schema(
    { timestamps: true }
 );
 
-courseSchema.pre('save', function (next) {
+courseSchema.pre('save', function () {
    if (this.isModified('basicInfo.title') || !this.slug) {
       const baseSlug = slugify(this.basicInfo.title || 'course', {
          lower: true,
@@ -122,7 +122,6 @@ courseSchema.pre('save', function (next) {
       const idFragment = this._id ? this._id.toString().slice(-6) : '';
       this.slug = idFragment ? `${baseSlug}-${idFragment}` : baseSlug;
    }
-   next();
 });
 
 const courseModel = mongoose.model('Course', courseSchema);

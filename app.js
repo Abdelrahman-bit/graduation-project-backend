@@ -7,6 +7,8 @@ import cors from 'cors';
 
 // routes
 import authRouter from './routes/authRoutes.js';
+import userRouter from './routes/userRoutes.js';
+import courseRouter from './routes/courseRoutes.js';
 
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';

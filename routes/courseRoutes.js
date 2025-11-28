@@ -9,11 +9,15 @@ import {
    updateCourseBasicInfo,
    updateCourseCurriculum,
 } from '../controller/courseControllers.js';
-import { protect, restrictTo } from '../middleware/authMiddleware.js';
+// import { protect } from '../middleware/authMiddleware.js';
+import restrictTo from '../middleware/authorization.js';
+import auth from '../middleware/authentication.js';
 
 const router = express.Router();
 
-router.use(protect, restrictTo('teacher', 'admin'));
+// Apply authentication and authorization middleware
+router.use(auth);
+router.use(restrictTo('instructor', 'admin'));
 
 router.route('/').post(createCourseDraft).get(getInstructorCourses);
 

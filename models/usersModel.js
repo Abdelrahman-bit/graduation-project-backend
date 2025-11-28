@@ -35,8 +35,8 @@ const userSchema = new Schema(
       role: {
          type: String,
          enum: {
-            values: ['admin', 'teacher', 'student'],
-            message: 'Role must be admin, teacher or student',
+            values: ['admin', 'instructor', 'student'],
+            message: 'Role must be admin, instructor or student',
          },
          default: 'student',
       },

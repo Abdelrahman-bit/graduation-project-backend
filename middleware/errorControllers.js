@@ -27,11 +27,24 @@ const sendErrorProd = (err, res) => {
 
 // Global Error Handler Middleware (spacifing 4 parameters express  will know that this MW for eror handling)
 const globalErrorController = (err, req, res, next) => {
+   // Ensure err is an object
+   if (!err || typeof err !== 'object') {
+      err = new AppError('An unknown error occurred', 500);
+   }
+
    err.statusCode = err.statusCode || 500; // => default error
    err.status = err.status || 'error'; // => default
 
+   // Ensure response hasn't been sent yet
+   if (res.headersSent) {
+      // If headers are already sent, we can't send a response
+      // Just log the error and return
+      console.error('Error occurred after response was sent:', err);
+      return;
+   }
+
    if (process.env.NODE_ENV === 'development') {
-      sendErrorDev(err, res);
+      return sendErrorDev(err, res);
    } else if (process.env.NODE_ENV === 'production') {
       if (err.name === 'CastError') {
          err = new AppError(`Invalid ${err.path}: ${err.value}`, 400);
@@ -56,6 +69,9 @@ const globalErrorController = (err, req, res, next) => {
       }
       return sendErrorProd(err, res);
    }
+
+   // Fallback if NODE_ENV is not set
+   return sendErrorDev(err, res);
 };
 
 export default globalErrorController;
