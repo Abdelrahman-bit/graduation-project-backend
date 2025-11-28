@@ -7,9 +7,10 @@ import cors from 'cors';
 
 // routes
 import authRouter from './routes/authRoutes.js';
+import courseRouter from './routes/courseRoutes.js';
 
 //global error controller
-import globalErrorController from './controller/errorControllers.js';
+import globalErrorController from './middleware/errorControllers.js';
 
 // configuration env File for Secret Data
 dotenv.config({
@@ -46,6 +47,7 @@ app.use(
 
 // Routes
 app.use('/api/auth', authRouter);
+app.use('/api/courses', courseRouter);
 
 app.use(globalErrorController);
 
