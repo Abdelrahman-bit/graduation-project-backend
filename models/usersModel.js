@@ -7,7 +7,7 @@ const userSchema = new Schema(
       name: {
          type: String,
          required: [true, 'User name is required'],
-         minlength: 3,
+         minlength: [3, 'Password must be at least 3 characters'],
       },
       email: {
          type: String,
@@ -35,11 +35,12 @@ const userSchema = new Schema(
       role: {
          type: String,
          enum: {
-            values: ['admin', 'teacher', 'student'],
+            values: ['admin', 'instructor', 'student'],
             message: 'Role must be admin, teacher or student',
          },
          default: 'student',
       },
+      phone: String,
       avatar: String,
       passwordUpdatedAt: Date,
       passwordResetToken: String,
