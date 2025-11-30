@@ -4,6 +4,7 @@ import {
    createCourseDraft,
    getCourseById,
    getInstructorCourses,
+   getInstructorDraftCourses,
    submitCourseForReview,
    updateCourseAdvancedInfo,
    updateCourseBasicInfo,
@@ -20,6 +21,8 @@ router.use(auth);
 router.use(restrictTo('instructor', 'admin'));
 
 router.route('/').post(createCourseDraft).get(getInstructorCourses);
+
+router.route('/drafts').get(getInstructorDraftCourses);
 
 router.route('/:courseId').get(getCourseById);
 

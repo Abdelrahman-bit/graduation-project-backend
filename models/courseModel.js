@@ -84,6 +84,8 @@ const advancedInfoSchema = new Schema(
       whatYouWillLearn: [{ type: String, maxlength: 170 }],
       targetAudience: [{ type: String, maxlength: 170 }],
       requirements: [{ type: String, maxlength: 170 }],
+      thumbnailUrl: String,
+      trailerUrl: String,
    },
    { _id: false, timestamps: false }
 );

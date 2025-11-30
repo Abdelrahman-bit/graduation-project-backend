@@ -126,3 +126,15 @@ export const getInstructorCourses = catchAsync(async (req, res) => {
       data: courses,
    });
 });
+
+export const getInstructorDraftCourses = catchAsync(async (req, res) => {
+   const courses = await courseModel
+      .find({ instructor: req.user._id, status: 'draft' })
+      .sort({ updatedAt: -1 });
+
+   res.status(200).json({
+      status: 'success',
+      results: courses.length,
+      data: courses,
+   });
+});
