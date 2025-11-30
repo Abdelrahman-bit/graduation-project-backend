@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
 import userModel from '../models/usersModel.js';
 import AppError from '../utils/appError.js';
+import catchAsync from '../utils/catchAsync.js';
 
 // authentication middleware that decrypt & check for the user Token
-const auth = async function (req, res, next) {
+const auth = catchAsync(async function (req, res, next) {
    let token;
    // 1 make sure the user Send the token in the headers if not rise an error (Bearer exampleToken)
 
@@ -42,6 +43,6 @@ const auth = async function (req, res, next) {
    req.user = user;
    // 4 exit the middleware
    next();
-};
+});
 
 export default auth;
