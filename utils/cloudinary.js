@@ -1,7 +1,23 @@
 import { v2 as cloudinary } from 'cloudinary';
-import dotenv from 'dotenv';
 
-dotenv.config({ path: '../config.env' });
+// Validate required env vars early for clearer errors
+const required = [
+   'CLOUDINARY_CLOUD_NAME',
+   'CLOUDINARY_API_KEY',
+   'CLOUDINARY_API_SECRET',
+];
+const missing = required.filter(
+   (k) => !process.env[k] || String(process.env[k]).trim() === ''
+);
+if (missing.length) {
+   // Helpful message, but do not throw in production boot if app can start without it.
+   // Throwing here is okay if Cloudinary is critical.
+   // eslint-disable-next-line no-console
+   console.warn(
+      `Cloudinary configuration missing: ${missing.join(', ')}. ` +
+         'Operations that require Cloudinary will fail until these are set.'
+   );
+}
 
 cloudinary.config({
    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

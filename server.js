@@ -1,3 +1,8 @@
+import dotenv from 'dotenv';
+// configuration env File for Secret Data
+dotenv.config({
+   path: './config.env',
+});
 import app from './app.js';
 import mongoose from 'mongoose';
 

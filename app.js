@@ -1,6 +1,5 @@
 // libraries
 import express from 'express';
-import dotenv from 'dotenv';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import cors from 'cors';
@@ -13,10 +12,6 @@ import courseRouter from './routes/courseRoutes.js';
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';
 
-// configuration env File for Secret Data
-dotenv.config({
-   path: './config.env',
-});
 // configure the Express application instance
 const app = express();
 
