@@ -30,11 +30,13 @@ export const createCourseDraft = catchAsync(async (req, res, next) => {
 
 export const updateCourseBasicInfo = catchAsync(async (req, res, next) => {
    const { courseId } = req.params;
-   const updatedCourse = await courseModel.findOneAndUpdate(
-      { _id: courseId, instructor: req.user._id },
-      { basicInfo: req.body.basicInfo },
-      buildUpdateOptions(req.user._id)
-   );
+   const updatedCourse = await courseModel
+      .findOneAndUpdate(
+         { _id: courseId, instructor: req.user._id },
+         { basicInfo: req.body.basicInfo },
+         buildUpdateOptions(req.user._id)
+      )
+      .select('-curriculum');
 
    if (!updatedCourse) {
       return next(new AppError('Course not found', 404));
@@ -48,11 +50,13 @@ export const updateCourseBasicInfo = catchAsync(async (req, res, next) => {
 
 export const updateCourseAdvancedInfo = catchAsync(async (req, res, next) => {
    const { courseId } = req.params;
-   const updatedCourse = await courseModel.findOneAndUpdate(
-      { _id: courseId, instructor: req.user._id },
-      { advancedInfo: req.body.advancedInfo },
-      buildUpdateOptions(req.user._id)
-   );
+   const updatedCourse = await courseModel
+      .findOneAndUpdate(
+         { _id: courseId, instructor: req.user._id },
+         { advancedInfo: req.body.advancedInfo },
+         buildUpdateOptions(req.user._id)
+      )
+      .select('-curriculum');
 
    if (!updatedCourse) {
       return next(new AppError('Course not found', 404));
@@ -66,11 +70,13 @@ export const updateCourseAdvancedInfo = catchAsync(async (req, res, next) => {
 
 export const updateCourseCurriculum = catchAsync(async (req, res, next) => {
    const { courseId } = req.params;
-   const updatedCourse = await courseModel.findOneAndUpdate(
-      { _id: courseId, instructor: req.user._id },
-      { curriculum: req.body.curriculum },
-      buildUpdateOptions(req.user._id)
-   );
+   const updatedCourse = await courseModel
+      .findOneAndUpdate(
+         { _id: courseId, instructor: req.user._id },
+         { curriculum: req.body.curriculum },
+         buildUpdateOptions(req.user._id)
+      )
+      .select('curriculum');
 
    if (!updatedCourse) {
       return next(new AppError('Course not found', 404));
@@ -103,7 +109,7 @@ export const submitCourseForReview = catchAsync(async (req, res, next) => {
 export const getCourseById = catchAsync(async (req, res, next) => {
    const { courseId } = req.params;
    const course = await courseModel
-      .findOne({ _id: courseId, instructor: req.user._id })
+      .findById(courseId)
       .populate('instructor', 'name email');
 
    if (!course) {
@@ -119,6 +125,7 @@ export const getCourseById = catchAsync(async (req, res, next) => {
 export const getInstructorCourses = catchAsync(async (req, res) => {
    const courses = await courseModel
       .find({ instructor: req.user._id })
+      .select('-curriculum')
       .sort({ updatedAt: -1 });
 
    res.status(200).json({
@@ -131,6 +138,7 @@ export const getInstructorCourses = catchAsync(async (req, res) => {
 export const getInstructorDraftCourses = catchAsync(async (req, res) => {
    const courses = await courseModel
       .find({ instructor: req.user._id, status: 'draft' })
+      .select('-curriculum')
       .sort({ updatedAt: -1 });
 
    res.status(200).json({
@@ -186,5 +194,27 @@ export const deleteCourse = catchAsync(async (req, res, next) => {
    res.status(204).json({
       status: 'success',
       data: null,
+   });
+});
+
+export const getAllCourses = catchAsync(async (req, res) => {
+   const courses = await courseModel
+      .find({ status: 'published' })
+      .select('-curriculum');
+   res.status(200).json({
+      status: 'success',
+      results: courses.length,
+      data: courses,
+   });
+});
+
+export const getInReviewCourses = catchAsync(async (req, res) => {
+   const courses = await courseModel
+      .find({ status: 'review' })
+      .select('-curriculum');
+   res.status(200).json({
+      status: 'success',
+      results: courses.length,
+      data: courses,
    });
 });
