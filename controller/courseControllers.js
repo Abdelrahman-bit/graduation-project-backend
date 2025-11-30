@@ -103,7 +103,7 @@ export const submitCourseForReview = catchAsync(async (req, res, next) => {
 export const getCourseById = catchAsync(async (req, res, next) => {
    const { courseId } = req.params;
    const course = await courseModel
-      .findOne({ _id: courseId, instructor: req.user._id })
+      .findById(courseId)
       .populate('instructor', 'name email');
 
    if (!course) {
