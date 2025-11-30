@@ -1,3 +1,4 @@
+import { deleteResource } from '../utils/cloudinary.js';
 import courseModel from '../models/courseModel.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
@@ -136,5 +137,54 @@ export const getInstructorDraftCourses = catchAsync(async (req, res) => {
       status: 'success',
       results: courses.length,
       data: courses,
+   });
+});
+
+export const deleteCourse = catchAsync(async (req, res, next) => {
+   const { courseId } = req.params;
+   const course = await courseModel.findById(courseId);
+
+   if (!course) {
+      return next(new AppError('Course not found', 404));
+   }
+
+   if (
+      course.instructor.toString() !== req.user._id.toString() &&
+      req.user.role !== 'admin'
+   ) {
+      return next(
+         new AppError('You are not authorized to delete this course', 403)
+      );
+   }
+
+   // Delete resources from Cloudinary
+   const { advancedInfo, curriculum } = course;
+   if (advancedInfo.thumbnail?.publicId) {
+      await deleteResource(advancedInfo.thumbnail.publicId, 'image');
+   }
+   if (advancedInfo.trailer?.publicId) {
+      await deleteResource(advancedInfo.trailer.publicId, 'video');
+   }
+
+   for (const section of curriculum.sections) {
+      for (const lecture of section.lectures) {
+         if (lecture.video?.publicId) {
+            await deleteResource(lecture.video.publicId, 'video');
+         }
+         if (lecture.attachments) {
+            for (const attachment of lecture.attachments) {
+               if (attachment.file?.publicId) {
+                  await deleteResource(attachment.file.publicId, 'raw');
+               }
+            }
+         }
+      }
+   }
+
+   await courseModel.findByIdAndDelete(courseId);
+
+   res.status(204).json({
+      status: 'success',
+      data: null,
    });
 });

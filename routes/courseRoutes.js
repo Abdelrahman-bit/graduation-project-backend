@@ -2,6 +2,7 @@ import express from 'express';
 
 import {
    createCourseDraft,
+   deleteCourse,
    getCourseById,
    getInstructorCourses,
    getInstructorDraftCourses,
@@ -24,7 +25,7 @@ router.route('/').post(createCourseDraft).get(getInstructorCourses);
 
 router.route('/drafts').get(getInstructorDraftCourses);
 
-router.route('/:courseId').get(getCourseById);
+router.route('/:courseId').get(getCourseById).delete(deleteCourse);
 
 router.patch('/:courseId/basic', updateCourseBasicInfo);
 router.patch('/:courseId/advanced', updateCourseAdvancedInfo);
