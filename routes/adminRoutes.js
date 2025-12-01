@@ -13,9 +13,11 @@ router.use(auth);
 router.use(restrictTo('admin'));
 
 // authentication routes
-// router.get('/dashboard', getApplicationRequests);
+// Application Requests Routes
 router.get('/dashboard/applicationRequest', getApplicationRequests);
-router.post('/dashboard/applicationRequest/:id', updateApplicationStatus);
+router
+   .route('/dashboard/applicationRequest/:id')
+   .patch(updateApplicationStatus);
 
 router.patch('/courses/:courseId/status', updateCourseStatus);
 

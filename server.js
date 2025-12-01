@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
 // configuration env File for Secret Data
+import app from './app.js';
+import mongoose from 'mongoose';
 dotenv.config({
    path: './config.env',
 });
-import app from './app.js';
-import mongoose from 'mongoose';
 
 // Build Mongo connection string
 const connectionString = process.env.MONGODB_URL.replace(
