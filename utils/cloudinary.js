@@ -1,5 +1,9 @@
 import { v2 as cloudinary } from 'cloudinary';
-
+import dotenv from 'dotenv';
+// configuration env File for Secret Data
+dotenv.config({
+   path: './config.env',
+});
 // Validate required env vars early for clearer errors
 const required = [
    'CLOUDINARY_CLOUD_NAME',
