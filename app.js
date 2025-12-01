@@ -35,10 +35,7 @@ app.use(express.json());
 // cors will allow frontend requests coming to the backend from different domains
 app.use(
    cors({
-      origin:
-         process.env.NODE_ENV === 'production'
-            ? process.env.FRONTEND_URL
-            : 'http://localhost:3000',
+      origin: 'http://localhost:3000',
       credentials: true,
    })
 );

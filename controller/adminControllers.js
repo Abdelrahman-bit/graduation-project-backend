@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import sendEmail from '../utils/sendEmail.js';
 
 export const getApplicationRequests = catchAsync(async (req, res, next) => {
-   const applications = await applicationModel.find({});
+   const applications = await applicationModel.find({ status: 'pending' });
 
    res.status(200).json({
       status: 'succuss',
@@ -16,7 +16,7 @@ export const getApplicationRequests = catchAsync(async (req, res, next) => {
 });
 
 // change the status to approved / rejected based on the req
-// if approved
+// if approved create a new user with temp password and send email
 
 export const updateApplicationStatus = catchAsync(async (req, res, next) => {
    const { status } = req.body;
@@ -27,6 +27,19 @@ export const updateApplicationStatus = catchAsync(async (req, res, next) => {
       return next(new AppError("application doesn't Exists", 404));
    }
 
+   const existingUser = await userModel.findOne({
+      email: application.email,
+   });
+
+   if (existingUser) {
+      // checking if the user already has an account in the users collection
+      return next(
+         new AppError(
+            'Cannot approve or reject this request because this email already has an account',
+            400
+         )
+      );
+   }
    if (status === 'approved') {
       const existingUser = await userModel.findOne({
          email: application.email,
@@ -69,12 +82,28 @@ Please change your password after login.
       };
 
       await sendEmail(emailDetails);
+   } else if (status === 'rejected') {
+      const emailDetails = {
+         email: application.email,
+         subject: 'E-Tutor Application Update',
+         text: `Hello ${application.name},
+
+We regret to inform you that your application to become an instructor at E-Tutor has been rejected.
+
+Regards,
+E-Tutor Team`,
+      };
+      await sendEmail(emailDetails);
+      console.log('Rejection email sent to:', application.email);
    }
 
    // Update status
    application.status = status;
    await application.save();
 
+   await applicationModel.findByIdAndDelete(id);
+
+   console.log(`Application ${id} status updated to ${status}`);
    res.status(200).json({
       status: 'success',
       message: `Application status updated to ${status}`,
@@ -96,7 +125,7 @@ export const updateCourseStatus = catchAsync(async (req, res, next) => {
       );
    }
 
-   const course = await courseModel.findById(courseId);
+   const course = await courseModel.findById(courseId).populate('instructor');
 
    if (!course) {
       return next(new AppError('Course not found', 404));
@@ -105,6 +134,15 @@ export const updateCourseStatus = catchAsync(async (req, res, next) => {
    course.status = status;
    if (status === 'published') {
       course.lastPublishedAt = Date.now();
+
+      const emailDetails = {
+         // send email to instructor about publication
+         email: course.instructor.email,
+         subject: 'E-Tutor Course Publication',
+         text: `Congratulations! Your course "${course.basicInfo.title}" has been published.`,
+      };
+
+      await sendEmail(emailDetails);
    }
 
    await course.save();
@@ -113,5 +151,39 @@ export const updateCourseStatus = catchAsync(async (req, res, next) => {
       status: 'success',
       message: `Course has been ${status}.`,
       data: course,
+   });
+});
+
+// get all courses in review status
+export const getInReviewCourses = catchAsync(async (req, res) => {
+   const courses = await courseModel
+      .find({ status: 'review' })
+      .populate('instructor', 'name email');
+   res.status(200).json({
+      status: 'success',
+      results: courses.length,
+      data: courses,
+   });
+});
+
+// search instructors by name and populate their courses
+export const searchInstructors = catchAsync(async (req, res, next) => {
+   // for admin to search instructors by name and populate there courses
+   const { name } = req.query;
+
+   const query = {
+      role: 'instructor',
+   };
+
+   if (name) {
+      query.name = { $regex: name, $options: 'i' };
+   }
+
+   const instructors = await userModel.find(query).populate('courses');
+
+   res.status(200).json({
+      status: 'success',
+      results: instructors.length,
+      data: instructors,
    });
 });

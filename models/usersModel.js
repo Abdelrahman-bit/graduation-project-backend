@@ -46,8 +46,18 @@ const userSchema = new Schema(
       passwordResetToken: String,
       passwordResetExpires: Date,
    },
-   { timestamps: true }
+   {
+      timestamps: true,
+      toJSON: { virtuals: true },
+      toObject: { virtuals: true },
+   }
 );
+
+userSchema.virtual('courses', {
+   ref: 'Course',
+   foreignField: 'instructor',
+   localField: '_id',
+});
 
 userSchema.pre('save', async function () {
    if (!this.isModified('password')) return;
