@@ -4,33 +4,85 @@ import enrollmentModel from '../models/enrollmentModel.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 
-const enrollStudent = catchAsync(async (req, res, next) => {
-   // 1) get the studentId from the req.user & courseId from the req.body
-   const studentId = req.user._id;
-   const { courseId } = req.body;
-   if (!courseId) {
+export const enrollStudent = catchAsync(async (req, res, next) => {
+   const student = req.user._id;
+   const course = req.body.course;
+
+   if (!course) {
       return next(new AppError('Course ID is required', 400));
    }
-   // 2) Check that course exists
-   const course = await courseModel.findById(courseId);
-   if (!course) {
-      return next(new AppError("Course doesn't Exists", 404));
+
+   const courseExist = await courseModel.findById(course);
+   if (!courseExist || courseExist.status !== 'published') {
+      return next(
+         new AppError(" Course isn't Published yet or Under admin review ", 404)
+      );
    }
-   // 3) check that the student isn't already unrolled in the course
-   const alreadyEnrolled = await enrollmentModel.findOne({
-      studentId,
-      courseId,
-   });
-   if (alreadyEnrolled) {
-      return next(new AppError(' student is Already Enrolled ', 400));
+
+   const existing = await enrollmentModel.findOne({ student, course });
+
+   if (existing && existing.status === 'enrolled') {
+      return next(new AppError('Student already enrolled', 400));
    }
-   // 3) enroll the student in the course & send back response to the student
-   const enrollementData = {
-      user: studentId,
-      course: courseId,
-   };
-   const enroll = await enrollmentModel.create(enrollementData);
+
+   if (existing && existing.status === 'unenrolled') {
+      existing.status = 'enrolled';
+      existing.unenrolledAt = undefined;
+      await existing.save();
+
+      return res.status(200).json({
+         status: 'Re-enrolled successfully',
+      });
+   }
+
+   await enrollmentModel.create({ student, course });
+
    res.status(201).json({
-      status: 'Enrolled Succussfully',
+      status: 'Enrolled successfully',
+   });
+});
+
+export const unenrollStudent = catchAsync(async (req, res, next) => {
+   const student = req.user._id;
+   const course = req.params.id;
+
+   console.log(student, course);
+
+   if (!course) {
+      return next(new AppError('Course ID is required', 400));
+   }
+
+   // 1) Find enrollment record
+   const enrolledStudent = await enrollmentModel.findOne({
+      student,
+      course,
+   });
+
+   // 2) If not enrolled OR already unenrolled → throw error
+   if (!enrolledStudent || enrolledStudent.status === 'unenrolled') {
+      return next(new AppError('Student is not enrolled in this course', 404));
+   }
+
+   // 3) Mark as unenrolled
+   enrolledStudent.status = 'unenrolled';
+   enrolledStudent.unenrolledAt = new Date();
+   await enrolledStudent.save();
+
+   res.status(200).json({
+      status: 'Unenrolled successfully',
+   });
+});
+
+export const getStudentCourses = catchAsync(async (req, res, next) => {
+   const student = req.user._id;
+
+   const studentCourses = await enrollmentModel
+      .find({ student, status: 'enrolled' })
+      .populate('course');
+
+   res.status(200).json({
+      status: 'Success',
+      results: studentCourses.length,
+      studentCourses,
    });
 });

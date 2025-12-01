@@ -1,6 +1,13 @@
 import express from 'express';
+// authentication
 import auth from '../middleware/authentication.js';
 import restrictTo from '../middleware/authorization.js';
+// controllers
+import {
+   enrollStudent,
+   unenrollStudent,
+   getStudentCourses,
+} from '../controller/studentControllers.js';
 
 const router = express.Router();
 
@@ -9,10 +16,10 @@ router.use(auth);
 router.use(restrictTo('student'));
 
 // add a Student to a course
-// router.post('/enroll/', enrollStudent);
-// // remove a Student from a course
-// router.patch('/unenroll/:id', unenrollStudent);
+router.post('/enroll/', enrollStudent);
+// remove a Student from a course
+router.patch('/unenroll/:id', unenrollStudent);
 
-// router.get('/my-courses', getStudentCourses);
+router.get('/my-courses', getStudentCourses);
 
 export default router;

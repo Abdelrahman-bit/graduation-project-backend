@@ -6,6 +6,7 @@ import {
    getCourseById,
    getInstructorCourses,
    getInstructorDraftCourses,
+   getAllCourses,
    submitCourseForReview,
    updateCourseAdvancedInfo,
    updateCourseBasicInfo,
@@ -16,6 +17,8 @@ import restrictTo from '../middleware/authorization.js';
 import auth from '../middleware/authentication.js';
 
 const router = express.Router();
+
+router.route('/published').get(getAllCourses);
 
 // Apply authentication and authorization middleware
 router.use(auth);

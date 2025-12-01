@@ -4,6 +4,7 @@ import {
    updateApplicationStatus,
    updateCourseStatus,
 } from '../controller/adminControllers.js';
+import { getInReviewCourses } from '../controller/courseControllers.js';
 import auth from '../middleware/authentication.js';
 import restrictTo from '../middleware/authorization.js';
 
@@ -20,5 +21,6 @@ router
    .patch(updateApplicationStatus);
 
 router.patch('/courses/:courseId/status', updateCourseStatus);
+router.get('/courses/review', getInReviewCourses);
 
 export default router;
