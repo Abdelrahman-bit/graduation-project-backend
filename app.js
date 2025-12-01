@@ -9,6 +9,7 @@ import authRouter from './routes/authRoutes.js';
 import instructorRouter from './routes/instructorRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
 import courseRouter from './routes/courseRoutes.js';
+import studentRouter from './routes/studentRoutes.js';
 
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';
@@ -47,6 +48,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/instructor', instructorRouter);
 app.use('/api/courses', courseRouter);
+app.use('/api/student', studentRouter);
 
 app.use(globalErrorController);
 
