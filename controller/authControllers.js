@@ -6,11 +6,11 @@ import { signToken } from '../utils/helpers.js';
 export const signup = catchAsync(async (req, res, next) => {
    // get user data (avoid data pollution)
    const userData = {
-      name: req.body.name,
+      name: `${req.body.firstName} ${req.body.lastName}`,
+      username: req.body.username,
       email: req.body.email,
       password: req.body.password,
       confirmPassword: req.body.confirmPassword,
-      role: req.body.role,
    };
    // create & save user to DB
    const newUser = await userModel.create(userData);
