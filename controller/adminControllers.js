@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import sendEmail from '../utils/sendEmail.js';
 
 export const getApplicationRequests = catchAsync(async (req, res, next) => {
-   const applications = await applicationModel.find({});
+   const applications = await applicationModel.find({ status: 'pending' });
 
    res.status(200).json({
       status: 'succuss',
