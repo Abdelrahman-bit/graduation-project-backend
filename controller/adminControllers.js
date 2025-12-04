@@ -59,6 +59,10 @@ export const updateApplicationStatus = catchAsync(async (req, res, next) => {
 
       const newInstructorData = {
          name: application.name,
+         username: `${application.name.split(' ').join('')}${crypto.randomInt(
+            100,
+            999
+         )}`,
          email: application.email,
          password: generatedPassword,
          confirmPassword: generatedPassword,
