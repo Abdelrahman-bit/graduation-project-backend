@@ -3,7 +3,9 @@ import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 
 export const getHalls = catchAsync(async (req, res, next) => {
-   const halls = await hallModel.find({ isBookable: true });
+   const halls = await hallModel.find({}).populate({
+      path: 'availability',
+   });
 
    res.status(200).json({
       status: 'success',
@@ -15,7 +17,9 @@ export const getHalls = catchAsync(async (req, res, next) => {
 export const getHallDetails = catchAsync(async (req, res, next) => {
    const { id } = req.params;
 
-   const hall = await hallModel.findById(id);
+   const hall = await hallModel.findById(id).populate({
+      path: 'availability',
+   });
 
    if (!hall) {
       return next(new AppError('No Hall Found', 404));

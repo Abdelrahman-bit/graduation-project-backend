@@ -46,8 +46,8 @@ const hallSchema = new Schema(
 
       availability: [
          {
-            startTime: { type: Date, required: true },
-            endTime: { type: Date, required: true },
+            type: Schema.Types.ObjectId,
+            ref: 'Slot',
          },
       ],
 
