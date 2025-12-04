@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 // a schema that defines the avalible Halls slots to be booked
 const slotSchema = new Schema({
-   hall: { type: mongoose.Schema.Types.ObjectId, ref: 'Hall' },
+   hall: { type: mongoose.Schema.Types.ObjectId, ref: 'Hall', required: true },
    startTime: {
       type: Date,
       required: true,
@@ -26,6 +26,8 @@ const slotSchema = new Schema({
 
 // document will auto removed from the DB
 slotSchema.index({ endTime: 1 }, { expireAfterSeconds: 0 });
+
+// slotSchema.index({ hall: 1, startTime: 1, endTime: 1 }, { unique: true });
 
 const slotmodel = mongoose.model('Slot', slotSchema);
 

@@ -13,10 +13,10 @@ export const createSlot = catchAsync(async (req, res, next) => {
       return next(new AppError('Hall not Found', 404));
    }
 
-   const existingSlot = await slotmodel.findOne({
-      id,
-      startTime,
-      endTime,
+   const existingSlot = await slotmodel.find({
+      hall: id,
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
    });
 
    if (existingSlot) {

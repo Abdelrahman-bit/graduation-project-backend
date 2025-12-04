@@ -13,6 +13,8 @@ const router = express.Router();
 router.use(auth);
 router.use(restrictTo('admin'));
 
+// NOTE : in post/patdh routes  recieves the hallId
+// NOTE : in delete route it recieves the slotId not the hallId
 router.route('/:id').post(createSlot).patch(updateSlot).delete(deleteSlot);
 
 export default router;

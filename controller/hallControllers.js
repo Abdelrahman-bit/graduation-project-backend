@@ -50,7 +50,30 @@ export const newHall = catchAsync(async (req, res, next) => {
 export const updateHallDetails = catchAsync(async (req, res, next) => {
    const { id } = req.params;
 
-   const hall = await hallModel.findByIdAndUpdate(id, req.body, {
+   // Prevent changing slots or availability
+   if ('availability' in req.body) {
+      return next(
+         new AppError("This route isn't capable of changing Slots", 401)
+      );
+   }
+
+   // Only allowed fields
+   const allowedUpdates = [
+      'name',
+      'thumbnail',
+      'description',
+      'capacity',
+      'facilities',
+      'hourlyPrice',
+      'isBookable',
+   ];
+
+   const updates = {};
+   allowedUpdates.forEach((field) => {
+      if (field in req.body) updates[field] = req.body[field];
+   });
+
+   const hall = await hallModel.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true,
    });
