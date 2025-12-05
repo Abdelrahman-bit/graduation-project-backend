@@ -3,8 +3,9 @@ import {
    getApplicationRequests,
    updateApplicationStatus,
    updateCourseStatus,
+   getInReviewCourses,
+   searchInstructors,
 } from '../controller/adminControllers.js';
-import { getInReviewCourses } from '../controller/courseControllers.js';
 import auth from '../middleware/authentication.js';
 import restrictTo from '../middleware/authorization.js';
 
@@ -14,13 +15,15 @@ router.use(auth);
 router.use(restrictTo('admin'));
 
 // authentication routes
-// Application Requests Routes
+// Application Requests Routes for instructor applications
 router.get('/dashboard/applicationRequest', getApplicationRequests);
+// update application status route
 router
    .route('/dashboard/applicationRequest/:id')
    .patch(updateApplicationStatus);
 
 router.patch('/courses/:courseId/status', updateCourseStatus);
 router.get('/courses/review', getInReviewCourses);
+router.get('/instructors', searchInstructors);
 
 export default router;
