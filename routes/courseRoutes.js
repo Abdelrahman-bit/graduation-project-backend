@@ -19,6 +19,7 @@ import auth from '../middleware/authentication.js';
 const router = express.Router();
 
 router.route('/published').get(getAllCourses);
+router.route('/:courseId').get(getCourseById);
 
 // Apply authentication and authorization middleware
 router.use(auth);
@@ -28,7 +29,7 @@ router.route('/').post(createCourseDraft).get(getInstructorCourses);
 
 router.route('/drafts').get(getInstructorDraftCourses);
 
-router.route('/:courseId').get(getCourseById).delete(deleteCourse);
+router.route('/:courseId').delete(deleteCourse);
 
 router.patch('/:courseId/basic', updateCourseBasicInfo);
 router.patch('/:courseId/advanced', updateCourseAdvancedInfo);
