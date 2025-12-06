@@ -110,7 +110,7 @@ export const getCourseById = catchAsync(async (req, res, next) => {
    const { courseId } = req.params;
    const course = await courseModel
       .findById(courseId)
-      .populate('instructor', 'name email');
+      .populate('instructor', 'firstname lastname email');
 
    if (!course) {
       return next(new AppError('Course not found', 404));
