@@ -20,6 +20,7 @@ export const createBooking = catchAsync(async (req, res, next) => {
    const { slot: slotId } = req.body;
    const userId = req.user.id;
 
+   console.log(slotId);
    // Check if slot exists
    const slot = await slotmodel.findById(slotId);
    if (!slot) {
@@ -43,21 +44,21 @@ export const createBooking = catchAsync(async (req, res, next) => {
    });
 });
 
-// Update booking status (e.g., cancel)
-export const updateBookingStatus = catchAsync(async (req, res, next) => {
-   const { id } = req.params;
-   const { status } = req.body;
+// // Update booking status (e.g., cancel)
+// export const updateBookingStatus = catchAsync(async (req, res, next) => {
+//    const { id } = req.params;
+//    const { status } = req.body;
 
-   const booking = await Booking.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true, runValidators: true }
-   );
+//    const booking = await bookingModel.findByIdAndUpdate(
+//       id,
+//       { status },
+//       { new: true, runValidators: true }
+//    );
 
-   if (!booking) return next(new AppError('Booking not found', 404));
+//    if (!booking) return next(new AppError('Booking not found', 404));
 
-   res.status(200).json({
-      status: 'success',
-      data: booking,
-   });
-});
+//    res.status(200).json({
+//       status: 'success',
+//       data: booking,
+//    });
+// });

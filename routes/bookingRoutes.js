@@ -18,7 +18,7 @@ router
    .post(restrictTo('instructor'), createBooking)
    .get(restrictTo('instructor'), getMyBookings);
 
-// Update booking status (admin)
-router.patch('/:id', restrictTo('admin'), updateBookingStatus);
+// Update booking status (admin) (take the booking Id in params & status in body)
+// router.patch('/:id', restrictTo('admin'), updateBookingStatus);
 
 export default router;
