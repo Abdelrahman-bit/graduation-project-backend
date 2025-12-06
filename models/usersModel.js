@@ -9,6 +9,12 @@ const userSchema = new Schema(
          required: [true, 'User name is required'],
          minlength: [3, 'Password must be at least 3 characters'],
       },
+      username: {
+         type: String,
+         required: [true, 'User name is required'],
+         minlength: [3, 'Username must be at least 3 characters'],
+         unique: true,
+      },
       email: {
          type: String,
          required: [true, 'User email is required'],
@@ -41,13 +47,27 @@ const userSchema = new Schema(
          default: 'student',
       },
       phone: String,
-      avatar: String,
+      avatar: {
+         type: String,
+         default:
+            'https://res.cloudinary.com/dzcjymfa3/image/upload/v1764872164/5da8b2bf-3bee-4eee-b2c9-009979981263.png',
+      },
       passwordUpdatedAt: Date,
       passwordResetToken: String,
       passwordResetExpires: Date,
    },
-   { timestamps: true }
+   {
+      timestamps: true,
+      toJSON: { virtuals: true },
+      toObject: { virtuals: true },
+   }
 );
+
+userSchema.virtual('courses', {
+   ref: 'Course',
+   foreignField: 'instructor',
+   localField: '_id',
+});
 
 userSchema.pre('save', async function () {
    if (!this.isModified('password')) return;

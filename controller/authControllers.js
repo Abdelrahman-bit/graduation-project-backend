@@ -6,20 +6,22 @@ import { signToken } from '../utils/helpers.js';
 export const signup = catchAsync(async (req, res, next) => {
    // get user data (avoid data pollution)
    const userData = {
-      name: req.body.name,
+      name: `${req.body.firstName} ${req.body.lastName}`,
+      username: req.body.username,
       email: req.body.email,
       password: req.body.password,
       confirmPassword: req.body.confirmPassword,
-      role: req.body.role,
    };
    // create & save user to DB
    const newUser = await userModel.create(userData);
 
    // generate & send Token
-   const token = signToken(newUser._id);
+   const token = signToken(newUser._id, newUser.role);
+   newUser.password = undefined;
    res.status(201).json({
       status: 'succuss',
       token, // send the newly generated token to the user
+      user: newUser,
    });
 });
 
@@ -37,10 +39,11 @@ export const login = catchAsync(async (req, res, next) => {
       return next(new AppError('InCorrect credentials', 401));
    }
    // 4 generate a token and send back to user
-   const token = signToken(user._id);
-
+   const token = signToken(user._id, user.role);
+   user.password = undefined;
    res.status(200).json({
       status: 'succuss',
       token,
+      user,
    });
 });

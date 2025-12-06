@@ -207,14 +207,3 @@ export const getAllCourses = catchAsync(async (req, res) => {
       data: courses,
    });
 });
-
-export const getInReviewCourses = catchAsync(async (req, res) => {
-   const courses = await courseModel
-      .find({ status: 'review' })
-      .select('-curriculum');
-   res.status(200).json({
-      status: 'success',
-      results: courses.length,
-      data: courses,
-   });
-});
