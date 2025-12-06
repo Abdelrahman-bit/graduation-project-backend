@@ -1,5 +1,6 @@
 import applicationModel from '../models/applicationModel.js';
 import userModel from '../models/usersModel.js';
+
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 import sendEmail from '../utils/sendEmail.js';
@@ -8,6 +9,7 @@ export const requestApplication = catchAsync(async (req, res, next) => {
    const { name, email, phone } = req.body;
 
    // 1) Email exists in Users → reject
+   const existingUser = await userModel.findOne({ email });
    const existingUser = await userModel.findOne({ email });
    if (existingUser) {
       console.log(
@@ -19,6 +21,7 @@ export const requestApplication = catchAsync(async (req, res, next) => {
    }
 
    // 2) Email already applied before → reject
+   const existingApplication = await applicationModel.findOne({ email });
    const existingApplication = await applicationModel.findOne({ email });
    if (existingApplication) {
       console.log(
@@ -36,6 +39,7 @@ export const requestApplication = catchAsync(async (req, res, next) => {
    };
 
    // 3) Store request in DB
+   const application = await applicationModel.create(applicationData);
    const application = await applicationModel.create(applicationData);
 
    // 4) Send confirm to the User

@@ -10,6 +10,10 @@ import instructorRouter from './routes/instructorRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
 import courseRouter from './routes/courseRoutes.js';
 import studentRouter from './routes/studentRoutes.js';
+import hallRouter from './routes/hallRoutes.js';
+import bookingRouter from './routes/bookingRoutes.js';
+import slotRouter from './routes/slotRoutes.js';
+import userRouter from './routes/userRoutes.js';
 
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';
@@ -41,11 +45,20 @@ app.use(
 );
 
 // Routes
+// authentication routes
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
+
+// users routes
 app.use('/api/instructor', instructorRouter);
-app.use('/api/courses', courseRouter);
 app.use('/api/student', studentRouter);
+app.use('/api/courses', courseRouter);
+app.use('/api/user', userRouter);
+
+// features routes
+app.use('/api/hall', hallRouter);
+app.use('/api/booking', bookingRouter);
+app.use('/api/slot', slotRouter);
 
 app.use(globalErrorController);
 
