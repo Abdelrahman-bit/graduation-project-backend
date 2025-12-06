@@ -2,9 +2,13 @@ import mongoose from 'mongoose';
 import validator from 'validator';
 
 const applicationSchema = new mongoose.Schema({
-   name: {
+   firstname: {
       type: String,
-      required: [true, 'Please provide your name'],
+      required: [true, 'Please provide your first name'],
+   },
+   lastname: {
+      type: String,
+      required: [true, 'Please provide your last name'],
    },
    email: {
       type: String,
