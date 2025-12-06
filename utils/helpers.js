@@ -9,4 +9,17 @@ export const signToken = (userID) => {
    });
 };
 
+// Filter the Body from notAllowed Fields
+export const filterBodyObj = (bodyObj, ...notAllowedFields) => {
+   const filteredObj = {};
+
+   Object.keys(bodyObj).forEach((key) => {
+      if (!notAllowedFields.includes(key)) {
+         filteredObj[key] = bodyObj[key];
+      }
+   });
+
+   return filteredObj;
+};
+
 // Email Generator function

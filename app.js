@@ -13,7 +13,7 @@ import studentRouter from './routes/studentRoutes.js';
 import hallRouter from './routes/hallRoutes.js';
 import bookingRouter from './routes/bookingRoutes.js';
 import slotRouter from './routes/slotRoutes.js';
-import userRouter from './routes/slotRoutes.js';
+import userRouter from './routes/userRoutes.js';
 
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';
@@ -56,7 +56,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/instructor', instructorRouter);
 app.use('/api/student', studentRouter);
 app.use('/api/courses', courseRouter);
-app.user('/api/user', userRouter);
+app.use('/api/user', userRouter);
 
 // features routes
 app.use('/api/hall', hallRouter);

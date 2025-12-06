@@ -4,7 +4,7 @@ import restrictTo from '../middleware/authorization.js';
 import {
    createBooking,
    getMyBookings,
-   updateBookingStatus,
+   // updateBookingStatus,
 } from '../controller/bookingControllers.js';
 
 const router = express.Router();
