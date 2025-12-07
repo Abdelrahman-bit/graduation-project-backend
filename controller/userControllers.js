@@ -33,6 +33,7 @@ export const updateUserProfile = catchAsync(async (req, res, next) => {
    }
 
    // 3) make sure To filter body so that user can't change Role
+
    const filteredBody = filterBodyObj(
       req.body,
       'role',
@@ -90,5 +91,27 @@ export const updateUserPassword = catchAsync(async (req, res, next) => {
    res.status(200).json({
       status: 'success',
       message: 'Password updated successfully',
+   });
+});
+
+export const updateUserAvatar = catchAsync(async (req, res, next) => {
+   const { id } = req.user;
+   const { Avatar } = req.body;
+
+   // 2) get user with password
+   const user = await userModel.findById(id);
+
+   if (!user) {
+      return next(new AppError('User not found', 404));
+   }
+
+   // 5) update the password
+   user.avatar = Avatar;
+   await user.save();
+
+   // 6) return the User has been updated
+   res.status(200).json({
+      status: 'success',
+      message: 'Profile Pic updated successfully',
    });
 });
