@@ -96,22 +96,31 @@ export const updateUserPassword = catchAsync(async (req, res, next) => {
 
 export const updateUserAvatar = catchAsync(async (req, res, next) => {
    const { id } = req.user;
-   const { Avatar } = req.body;
+   const { avatar } = req.body;
 
-   // 2) get user with password
-   const user = await userModel.findById(id);
+   // 1) Validate avatar URL is provided
+   if (!avatar) {
+      return next(new AppError('Avatar URL is required', 400));
+   }
 
-   if (!user) {
+   // 2) Update user avatar using findByIdAndUpdate to avoid validation issues
+   const updatedUser = await userModel.findByIdAndUpdate(
+      id,
+      { avatar },
+      {
+         new: true,
+         runValidators: false, // Don't run validators to avoid confirmPassword requirement
+      }
+   );
+
+   if (!updatedUser) {
       return next(new AppError('User not found', 404));
    }
 
-   // 5) update the password
-   user.avatar = Avatar;
-   await user.save();
-
-   // 6) return the User has been updated
+   // 3) Return the updated user
    res.status(200).json({
       status: 'success',
       message: 'Profile Pic updated successfully',
+      user: updatedUser,
    });
 });
