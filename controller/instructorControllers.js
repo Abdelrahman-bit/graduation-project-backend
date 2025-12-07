@@ -10,7 +10,6 @@ export const requestApplication = catchAsync(async (req, res, next) => {
 
    // 1) Email exists in Users → reject
    const existingUser = await userModel.findOne({ email });
-   const existingUser = await userModel.findOne({ email });
    if (existingUser) {
       console.log(
          `Application with email ${email} already belongs to an existing user`
@@ -21,7 +20,6 @@ export const requestApplication = catchAsync(async (req, res, next) => {
    }
 
    // 2) Email already applied before → reject
-   const existingApplication = await applicationModel.findOne({ email });
    const existingApplication = await applicationModel.findOne({ email });
    if (existingApplication) {
       console.log(
@@ -39,7 +37,6 @@ export const requestApplication = catchAsync(async (req, res, next) => {
    };
 
    // 3) Store request in DB
-   const application = await applicationModel.create(applicationData);
    const application = await applicationModel.create(applicationData);
 
    // 4) Send confirm to the User

@@ -21,7 +21,6 @@ export const signup = catchAsync(async (req, res, next) => {
    res.status(201).json({
       status: 'succuss',
       token, // send the newly generated token to the user
-      user: newUser,
    });
 });
 
@@ -44,6 +43,5 @@ export const login = catchAsync(async (req, res, next) => {
    res.status(200).json({
       status: 'succuss',
       token,
-      user,
    });
 });
