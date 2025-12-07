@@ -51,6 +51,13 @@ const userSchema = new Schema(
          default:
             'https://res.cloudinary.com/dzcjymfa3/image/upload/v1764872164/5da8b2bf-3bee-4eee-b2c9-009979981263.png',
       },
+      title: {
+         type: String,
+         maxLength: [60, 'Your title cannot exceed 60 characters'],
+      },
+      biography: {
+         type: String,
+      },
       passwordUpdatedAt: Date,
       passwordResetToken: String,
       passwordResetExpires: Date,
