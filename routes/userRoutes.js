@@ -4,6 +4,7 @@ import {
    getUserProfile,
    updateUserProfile,
    updateUserPassword,
+   updateUserAvatar,
 } from '../controller/userControllers.js';
 
 const router = express.Router();
@@ -13,5 +14,6 @@ router.use(auth);
 
 router.route('/profile').get(getUserProfile).patch(updateUserProfile);
 router.patch('/profile/updatePassword', updateUserPassword);
+router.patch('/profile/updateProfilePic', updateUserAvatar);
 
 export default router;
