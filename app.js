@@ -22,6 +22,15 @@ import globalErrorController from './middleware/errorControllers.js';
 const app = express();
 
 // Global Middlewares
+
+// CORS must come FIRST before helmet to prevent header conflicts
+app.use(
+   cors({
+      origin: 'http://localhost:3000',
+      credentials: true,
+   })
+);
+
 // Helmet : auto includes the Security protocols / headers along each request
 app.use(helmet());
 
@@ -35,14 +44,6 @@ app.use('/api', limiter);
 
 // well confiqure each request to json to be able to extract body data
 app.use(express.json());
-
-// cors will allow frontend requests coming to the backend from different domains
-app.use(
-   cors({
-      origin: 'http://localhost:3000',
-      credentials: true,
-   })
-);
 
 // Routes
 // authentication routes

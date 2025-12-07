@@ -123,10 +123,32 @@ export const getCourseById = catchAsync(async (req, res, next) => {
 });
 
 export const getInstructorCourses = catchAsync(async (req, res) => {
-   const courses = await courseModel
-      .find({ instructor: req.user._id })
-      .select('-curriculum')
-      .sort({ updatedAt: -1 });
+   const courses = await courseModel.aggregate([
+      { $match: { instructor: req.user._id } },
+      {
+         $lookup: {
+            from: 'enrollments',
+            localField: '_id',
+            foreignField: 'course',
+            as: 'enrollments',
+         },
+      },
+      {
+         $addFields: {
+            students: {
+               $size: {
+                  $filter: {
+                     input: '$enrollments',
+                     as: 'enrollment',
+                     cond: { $eq: ['$$enrollment.status', 'enrolled'] },
+                  },
+               },
+            },
+         },
+      },
+      { $project: { enrollments: 0, curriculum: 0 } },
+      { $sort: { updatedAt: -1 } },
+   ]);
 
    res.status(200).json({
       status: 'success',
