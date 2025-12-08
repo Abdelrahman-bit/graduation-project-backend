@@ -58,11 +58,8 @@ export const updateApplicationStatus = catchAsync(async (req, res, next) => {
       const generatedPassword = crypto.randomBytes(12).toString('hex');
 
       const newInstructorData = {
-         name: application.name,
-         username: `${application.name.split(' ').join('')}${crypto.randomInt(
-            100,
-            999
-         )}`,
+         firstname: application.firstname,
+         lastname: application.lastname,
          email: application.email,
          password: generatedPassword,
          confirmPassword: generatedPassword,
@@ -90,7 +87,7 @@ Please change your password after login.
       const emailDetails = {
          email: application.email,
          subject: 'E-Tutor Application Update',
-         text: `Hello ${application.name},
+         text: `Hello ${application.firstname} ${application.lastname},
 
 We regret to inform you that your application to become an instructor at E-Tutor has been rejected.
 
@@ -162,7 +159,7 @@ export const updateCourseStatus = catchAsync(async (req, res, next) => {
 export const getInReviewCourses = catchAsync(async (req, res) => {
    const courses = await courseModel
       .find({ status: 'review' })
-      .populate('instructor', 'name email');
+      .populate('instructor', 'firstname lastname email');
    res.status(200).json({
       status: 'success',
       results: courses.length,
@@ -173,14 +170,17 @@ export const getInReviewCourses = catchAsync(async (req, res) => {
 // search instructors by name and populate their courses
 export const searchInstructors = catchAsync(async (req, res, next) => {
    // for admin to search instructors by name and populate there courses
-   const { name } = req.query;
+   const { firstname, lastname } = req.query;
 
    const query = {
       role: 'instructor',
    };
 
-   if (name) {
-      query.name = { $regex: name, $options: 'i' };
+   if (firstname) {
+      query.firstname = { $regex: firstname, $options: 'i' };
+   }
+   if (lastname) {
+      query.lastname = { $regex: lastname, $options: 'i' };
    }
 
    const instructors = await userModel.find(query).populate('courses');

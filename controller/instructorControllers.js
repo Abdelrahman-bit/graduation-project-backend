@@ -1,11 +1,12 @@
 import applicationModel from '../models/applicationModel.js';
 import userModel from '../models/usersModel.js';
+
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 import sendEmail from '../utils/sendEmail.js';
 
 export const requestApplication = catchAsync(async (req, res, next) => {
-   const { name, email, phone } = req.body;
+   const { firstname, lastname, email, phone } = req.body;
 
    // 1) Email exists in Users → reject
    const existingUser = await userModel.findOne({ email });
@@ -30,7 +31,8 @@ export const requestApplication = catchAsync(async (req, res, next) => {
    }
 
    const applicationData = {
-      name,
+      firstname,
+      lastname,
       email,
       phone,
    };
@@ -42,7 +44,7 @@ export const requestApplication = catchAsync(async (req, res, next) => {
    const emailDetails = {
       email,
       subject: 'E-Tutor Application Recieved',
-      text: `Hello ${name},
+      text: `Hello ${firstname} ${lastname},
 
 We have recieved your application to become an instructor at E-Tutor.
 We will get back to you shortly after reviewing your application.

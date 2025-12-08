@@ -6,8 +6,8 @@ import { signToken } from '../utils/helpers.js';
 export const signup = catchAsync(async (req, res, next) => {
    // get user data (avoid data pollution)
    const userData = {
-      name: `${req.body.firstName} ${req.body.lastName}`,
-      username: req.body.username,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
       email: req.body.email,
       password: req.body.password,
       confirmPassword: req.body.confirmPassword,
@@ -21,7 +21,6 @@ export const signup = catchAsync(async (req, res, next) => {
    res.status(201).json({
       status: 'succuss',
       token, // send the newly generated token to the user
-      user: newUser,
    });
 });
 
@@ -44,6 +43,5 @@ export const login = catchAsync(async (req, res, next) => {
    res.status(200).json({
       status: 'succuss',
       token,
-      user,
    });
 });
