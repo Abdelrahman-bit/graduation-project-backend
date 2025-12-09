@@ -36,7 +36,7 @@ app.use(helmet());
 
 //(express-rate-limit) will limit the number of request coming from same domain in a ranged time (help against prudeForce, DoS attacks)
 const limiter = rateLimit({
-   limit: 100,
+   limit: 1000,
    windowMs: 60 * 60 * 1000, // 1 hour
    message: 'Max request count Reached try again in 1 hour',
 });

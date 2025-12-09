@@ -2,6 +2,7 @@ import { deleteResource } from '../utils/cloudinary.js';
 import courseModel from '../models/courseModel.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
+import mongoose from 'mongoose';
 
 const buildUpdateOptions = (userId) => ({
    new: true,
@@ -223,6 +224,83 @@ export const getAllCourses = catchAsync(async (req, res) => {
    const courses = await courseModel
       .find({ status: 'published' })
       .select('-curriculum');
+   res.status(200).json({
+      status: 'success',
+      results: courses.length,
+      data: courses,
+   });
+});
+
+export const getPublicInstructorCourses = catchAsync(async (req, res, next) => {
+   const { instructorId } = req.params;
+
+   // Validate ObjectId
+   if (!mongoose.Types.ObjectId.isValid(instructorId)) {
+      return next(new AppError('Invalid instructor ID', 400));
+   }
+
+   const courses = await courseModel.aggregate([
+      {
+         $match: {
+            instructor: new mongoose.Types.ObjectId(instructorId),
+            status: 'published',
+         },
+      },
+      {
+         $lookup: {
+            from: 'enrollments',
+            localField: '_id',
+            foreignField: 'course',
+            as: 'enrollments',
+         },
+      },
+      {
+         $addFields: {
+            students: {
+               $size: {
+                  $filter: {
+                     input: '$enrollments',
+                     as: 'enrollment',
+                     cond: { $eq: ['$$enrollment.status', 'enrolled'] },
+                  },
+               },
+            },
+         },
+      },
+      // Populate instructor not directly possible in aggregate without lookup, but usually we just need basic info.
+      // However, frontend page fetches instructor profile separately, so we might not need to deeply populate instructor here
+      {
+         $lookup: {
+            from: 'users',
+            localField: 'instructor',
+            foreignField: '_id',
+            as: 'instructorInfo',
+         },
+      },
+      {
+         $unwind: '$instructorInfo',
+      },
+      // Shape the data to match expected output (instructor object instead of array)
+      {
+         $addFields: {
+            instructor: {
+               firstname: '$instructorInfo.firstname',
+               lastname: '$instructorInfo.lastname',
+               avatar: '$instructorInfo.avatar',
+               title: '$instructorInfo.title',
+            },
+         },
+      },
+      {
+         $project: {
+            enrollments: 0,
+            curriculum: 0,
+            instructorInfo: 0,
+         },
+      },
+      { $sort: { updatedAt: -1 } },
+   ]);
+
    res.status(200).json({
       status: 'success',
       results: courses.length,

@@ -10,6 +10,9 @@ const enrollmentSchema = new Schema(
          default: 'enrolled',
       },
       unenrolledAt: { type: Date },
+      progress: { type: Number, default: 0 },
+      completedLectures: [{ type: Schema.Types.ObjectId }],
+      lastAccessed: { type: Date, default: Date.now },
    },
    { timestamps: true }
 );

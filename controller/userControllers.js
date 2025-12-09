@@ -3,6 +3,7 @@ import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 import { filterBodyObj } from '../utils/helpers.js';
 
+// Basic get for logged in user
 export const getUserProfile = catchAsync(async (req, res, next) => {
    const { id } = req.user;
    //    1) get users data
@@ -14,6 +15,22 @@ export const getUserProfile = catchAsync(async (req, res, next) => {
    res.status(200).json({
       status: 'succuss',
       user,
+   });
+});
+
+export const getPublicUserProfile = catchAsync(async (req, res, next) => {
+   const { id } = req.params;
+   const user = await userModel
+      .findById(id)
+      .select('firstname lastname avatar title biography role'); // Select safe fields
+
+   if (!user) {
+      return next(new AppError('User not found', 404));
+   }
+
+   res.status(200).json({
+      status: 'success',
+      data: user,
    });
 });
 

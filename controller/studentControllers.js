@@ -1,5 +1,6 @@
 import courseModel from '../models/courseModel.js';
 import enrollmentModel from '../models/enrollmentModel.js';
+import wishlistModel from '../models/wishlistModel.js';
 
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
@@ -78,11 +79,127 @@ export const getStudentCourses = catchAsync(async (req, res, next) => {
 
    const studentCourses = await enrollmentModel
       .find({ student, status: 'enrolled' })
-      .populate('course');
+      .populate({
+         path: 'course',
+         populate: {
+            path: 'instructor',
+            select: 'firstname lastname avatar title',
+         },
+      });
 
    res.status(200).json({
       status: 'Success',
       results: studentCourses.length,
       studentCourses,
+   });
+});
+
+// --- Wishlist Controllers ---
+export const getWishlist = catchAsync(async (req, res, next) => {
+   const userId = req.user._id;
+   const wishlist = await wishlistModel.find({ user: userId }).populate({
+      path: 'course',
+      populate: { path: 'instructor', select: 'firstname lastname' },
+   });
+
+   res.status(200).json({
+      status: 'success',
+      results: wishlist.length,
+      data: wishlist,
+   });
+});
+
+export const addToWishlist = catchAsync(async (req, res, next) => {
+   const userId = req.user._id;
+   const { courseId } = req.body;
+
+   const exists = await wishlistModel.findOne({
+      user: userId,
+      course: courseId,
+   });
+   if (exists) {
+      return next(new AppError('Course already in wishlist', 400));
+   }
+
+   const newItem = await wishlistModel.create({
+      user: userId,
+      course: courseId,
+   });
+
+   res.status(201).json({
+      status: 'success',
+      data: newItem,
+   });
+});
+
+export const removeFromWishlist = catchAsync(async (req, res, next) => {
+   const userId = req.user._id;
+   const { id } = req.params; // Wishlist Item ID or Course ID? Let's assume Course ID for easier frontend logic, or handle both.
+   // Ideally, delete by course ID for this user is safer/easier from UI
+
+   const deleted = await wishlistModel.findOneAndDelete({
+      user: userId,
+      course: id,
+   });
+
+   if (!deleted) {
+      return next(new AppError('Item not found in wishlist', 404));
+   }
+
+   res.status(204).json({
+      status: 'success',
+      data: null,
+   });
+});
+
+// --- Stats and Progress ---
+export const getStudentStats = catchAsync(async (req, res, next) => {
+   const studentId = req.user._id;
+
+   const enrollments = await enrollmentModel
+      .find({
+         student: studentId,
+         status: 'enrolled',
+      })
+      .populate('course');
+
+   const enrolledCount = enrollments.length;
+   const completedCount = enrollments.filter((e) => e.progress === 100).length;
+   const activeCount = enrolledCount - completedCount;
+
+   // Unique Instructors
+   const instructorIds = new Set(
+      enrollments.map((e) => e.course.instructor?.toString()).filter(Boolean)
+   );
+
+   res.status(200).json({
+      status: 'success',
+      data: {
+         enrolledCourses: enrolledCount,
+         activeCourses: activeCount,
+         completedCourses: completedCount,
+         courseInstructors: instructorIds.size,
+      },
+   });
+});
+
+export const updateProgress = catchAsync(async (req, res, next) => {
+   const studentId = req.user._id;
+   const { courseId, progress, lastAccessed } = req.body;
+
+   const enrollment = await enrollmentModel.findOne({
+      student: studentId,
+      course: courseId,
+   });
+   if (!enrollment) return next(new AppError('Enrollment not found', 404));
+
+   if (progress !== undefined) enrollment.progress = progress;
+   if (lastAccessed) enrollment.lastAccessed = lastAccessed;
+
+   await enrollment.save();
+
+   res.status(200).json({
+      status: 'success',
+      data: enrollment,
    });
 });
