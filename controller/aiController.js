@@ -1,4 +1,3 @@
-import { Readable } from 'stream';
 import { handleChat } from '../services/ai/chatService.js';
 
 export const chatWithAI = async (req, res, next) => {
