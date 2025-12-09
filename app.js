@@ -61,6 +61,10 @@ app.use('/api/hall', hallRouter);
 app.use('/api/booking', bookingRouter);
 app.use('/api/slot', slotRouter);
 
+// AI Chat Routes
+import aiRouter from './routes/aiRoutes.js';
+app.use('/api/chat', aiRouter);
+
 app.use(globalErrorController);
 
 export default app;

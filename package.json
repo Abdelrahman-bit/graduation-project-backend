@@ -18,7 +18,13 @@
       ]
    },
    "dependencies": {
+      "@ai-sdk/openai": "^2.0.80",
+      "@ai-sdk/react": "^2.0.109",
       "@faker-js/faker": "^10.1.0",
+      "@langchain/core": "^1.1.4",
+      "@langchain/openai": "^1.1.3",
+      "@pinecone-database/pinecone": "^6.1.3",
+      "ai": "^5.0.108",
       "bcrypt": "^6.0.0",
       "cloudinary": "^2.8.0",
       "cors": "^2.8.5",
@@ -27,11 +33,13 @@
       "express-rate-limit": "^8.2.1",
       "helmet": "^8.1.0",
       "jsonwebtoken": "^9.0.2",
+      "langchain": "^1.1.5",
       "mongoose": "^9.0.0",
       "nodemailer": "^7.0.11",
       "nodemon": "^3.1.11",
       "slugify": "^1.6.6",
-      "validator": "^13.15.23"
+      "validator": "^13.15.23",
+      "zod": "^4.1.13"
    },
    "devDependencies": {
       "eslint": "^9.39.1",
