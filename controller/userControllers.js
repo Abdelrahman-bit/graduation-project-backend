@@ -22,7 +22,7 @@ export const getPublicUserProfile = catchAsync(async (req, res, next) => {
    const { id } = req.params;
    const user = await userModel
       .findById(id)
-      .select('firstname lastname avatar title biography role'); // Select safe fields
+      .select('firstname lastname email avatar role biography title'); // Select safe fields
 
    if (!user) {
       return next(new AppError('User not found', 404));

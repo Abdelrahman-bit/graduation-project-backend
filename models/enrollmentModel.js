@@ -4,14 +4,15 @@ const enrollmentSchema = new Schema(
    {
       student: { type: Schema.Types.ObjectId, ref: 'User', required: true },
       course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
-      status: {
-         type: String,
-         enum: ['enrolled', 'unenrolled'],
-         default: 'enrolled',
-      },
+      isDeleted: { type: Boolean, default: false },
       unenrolledAt: { type: Date },
       progress: { type: Number, default: 0 },
-      completedLectures: [{ type: Schema.Types.ObjectId }],
+      completedLectures: [
+         {
+            lectureId: { type: String },
+            completedAt: { type: Date, default: Date.now },
+         },
+      ],
       lastAccessed: { type: Date, default: Date.now },
    },
    { timestamps: true }

@@ -2,6 +2,7 @@ import { deleteResource } from '../utils/cloudinary.js';
 import courseModel from '../models/courseModel.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
+import mongoose from 'mongoose';
 import {
    processCourseForEmbedding,
    deleteCourseEmbeddings,

@@ -12,6 +12,7 @@ import {
    addToWishlist,
    removeFromWishlist,
    updateProgress,
+   getEnrollment,
 } from '../controller/studentControllers.js';
 
 const router = express.Router();
@@ -28,6 +29,7 @@ router.get('/stats', getStudentStats);
 router.post('/enroll/', enrollStudent);
 router.patch('/unenroll/:id', unenrollStudent);
 router.get('/my-courses', getStudentCourses);
+router.get('/enrollment/:courseId', getEnrollment);
 router.patch('/progress', updateProgress);
 
 // Wishlist
