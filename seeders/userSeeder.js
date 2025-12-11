@@ -52,7 +52,10 @@ export const seedUsers = async () => {
       }
 
       // ✅ Insert into DB
-      await userModel.insertMany(users);
+      for (const user of users) {
+         const doc = new userModel(user);
+         await doc.save();
+      }
 
       console.log('✅ 10 Instructors + 5 Students Successfully Seeded!');
       process.exit();
