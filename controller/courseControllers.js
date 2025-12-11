@@ -110,7 +110,7 @@ export const getCourseById = catchAsync(async (req, res, next) => {
    const { courseId } = req.params;
    const course = await courseModel
       .findById(courseId)
-      .populate('instructor', 'name email');
+      .populate('instructor', 'firstname lastname email');
 
    if (!course) {
       return next(new AppError('Course not found', 404));
@@ -200,17 +200,6 @@ export const deleteCourse = catchAsync(async (req, res, next) => {
 export const getAllCourses = catchAsync(async (req, res) => {
    const courses = await courseModel
       .find({ status: 'published' })
-      .select('-curriculum');
-   res.status(200).json({
-      status: 'success',
-      results: courses.length,
-      data: courses,
-   });
-});
-
-export const getInReviewCourses = catchAsync(async (req, res) => {
-   const courses = await courseModel
-      .find({ status: 'review' })
       .select('-curriculum');
    res.status(200).json({
       status: 'success',

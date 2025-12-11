@@ -1,0 +1,22 @@
+import mongoose, { Schema } from 'mongoose';
+
+const enrollmentSchema = new Schema(
+   {
+      student: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+      course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+      status: {
+         type: String,
+         enum: ['enrolled', 'unenrolled'],
+         default: 'enrolled',
+      },
+      unenrolledAt: { type: Date },
+   },
+   { timestamps: true }
+);
+
+// Make sure user cannot enroll same course twice
+enrollmentSchema.index({ student: 1, course: 1 }, { unique: true });
+
+const enrollmentModel = mongoose.model('Enrollment', enrollmentSchema);
+
+export default enrollmentModel;

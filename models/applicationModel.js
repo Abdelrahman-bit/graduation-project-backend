@@ -1,23 +1,24 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose from 'mongoose';
 import validator from 'validator';
-import bcrypt from 'bcrypt';
 
-const instructorApplicationSchema = new Schema({
-   name: {
+const applicationSchema = new mongoose.Schema({
+   firstname: {
       type: String,
-      required: [true, 'User name is required'],
-      minlength: [3, 'Name must be at least 3 characters'],
+      required: [true, 'Please provide your first name'],
+   },
+   lastname: {
+      type: String,
+      required: [true, 'Please provide your last name'],
    },
    email: {
       type: String,
-      required: [true, 'User email is required'],
-      unique: true,
+      required: [true, 'Please provide your email'],
       lowercase: true,
-      validate: [validator.isEmail, 'Please enter a valid email'],
+      validate: [validator.isEmail, 'Please provide a valid email'],
    },
    phone: {
       type: String,
-      required: [true, 'Phone number is required'],
+      required: [true, 'Please provide your phone number'],
    },
    status: {
       type: String,
@@ -26,13 +27,10 @@ const instructorApplicationSchema = new Schema({
    },
    createdAt: {
       type: Date,
-      default: Date.now,
+      default: Date.now(),
    },
 });
 
-const applicationModel = mongoose.model(
-   'ApplicationModel',
-   instructorApplicationSchema
-);
+const Application = mongoose.model('Application', applicationSchema);
 
-export default applicationModel;
+export default Application;
