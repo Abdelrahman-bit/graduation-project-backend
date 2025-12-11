@@ -21,7 +21,7 @@ export const createGetMyEnrollments = (userId) =>
       execute: async () => {
          try {
             const enrollments = await Enrollment.find({
-               user: userId,
+               student: userId,
             }).populate(
                'course',
                'basicInfo.title basicInfo.subtitle slug status'
@@ -63,7 +63,7 @@ export const createGetEnrollmentCount = (userId) =>
       inputSchema: z.object({}),
       execute: async () => {
          try {
-            const count = await Enrollment.countDocuments({ user: userId });
+            const count = await Enrollment.countDocuments({ student: userId });
 
             return {
                enrollmentCount: count,

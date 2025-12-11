@@ -1,4 +1,4 @@
-import { streamText, convertToModelMessages } from 'ai';
+import { streamText, convertToModelMessages, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { getRelevantContext } from './ragService.js';
 import { getToolsForRole, getToolNamesForRole } from './tools/index.js';
@@ -110,7 +110,7 @@ For example: "Hi ${userName}!", "Great question, ${userName}!", "${userName}, yo
    try {
       if (role === 'student' && userId) {
          // For students: filter by their enrolled courses
-         const enrollments = await Enrollment.find({ user: userId }).select(
+         const enrollments = await Enrollment.find({ student: userId }).select(
             'course'
          );
          const courseIds = enrollments.map((e) => e.course.toString());
@@ -125,8 +125,9 @@ For example: "Hi ${userName}!", "Great question, ${userName}!", "${userName}, yo
          }
       } else if (role === 'instructor' && userId) {
          // For instructors: filter by courses they created
+         // Note: Pinecone requires $eq operator for single value matches
          context = await getRelevantContext(query, {
-            instructorId: userId.toString(),
+            instructorId: { $eq: userId.toString() },
          });
       } else if (role === 'admin') {
          // Admins get full access to all context
@@ -152,7 +153,7 @@ For example: "Hi ${userName}!", "Great question, ${userName}!", "${userName}, yo
       system: systemPrompt,
       messages: convertToModelMessages(messages),
       tools,
-      maxSteps: 3, // Allow multi-step tool calls so AI can use results
+      stopWhen: stepCountIs(3), // Allow multi-step: tool call → use result → generate text
       onStepFinish: (stepResult) => {
          // In AI SDK v5, stepResult contains the full step info
          console.log(`[ChatService] ===== STEP FINISHED =====`);

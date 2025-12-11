@@ -12,6 +12,7 @@ const connectionString = process.env.MONGODB_URL.replace(
    '<USERNAME>',
    process.env.DB_USERNAME
 ).replace('<PASSWORD>', process.env.DB_PASSWORD);
+
 // ✅ YOUR FIXED VIDEO SOURCES
 const VIDEO_POOL = [
    'https://res.cloudinary.com/dzcjymfa3/video/upload/v1764513146/x3tuv4uazs7fklwrfxwo.mp4',
@@ -20,10 +21,116 @@ const VIDEO_POOL = [
    'https://res.cloudinary.com/dzcjymfa3/video/upload/v1764449957/mokffsxjigl5i76xu9ps.mp4',
 ];
 
-// ✅ UNSPLASH IMAGE GENERATOR (NO API KEY)
+// ✅ RANDOM IMAGE
 const RANDOM_IMAGE = () =>
    `https://picsum.photos/800/600?random=${Math.floor(Math.random() * 10000)}`;
 
+/* ---------------------------
+  Curated content pools
+   - Use meaningful titles/subtitles/outcomes
+----------------------------*/
+const COURSE_TITLES = [
+   'Modern React with Hooks & Context',
+   'Node.js REST APIs from Zero to Production',
+   'Full-Stack MERN E-Commerce',
+   'Practical PostgreSQL for Developers',
+   'Intro to Machine Learning with Python',
+   'TypeScript for JavaScript Developers',
+   'Frontend Performance Optimization',
+   'Three.js: 3D Web Experiences',
+   'Testing JavaScript Apps (Jest + RTL)',
+   'Secure Web Authentication (JWT & OAuth)',
+];
+
+const SUBTITLES = [
+   'Build production-ready apps with best practices',
+   'Design, implement and deploy scalable APIs',
+   'From product model to checkout and payments',
+   'Databases, queries and performance tuning',
+   'Models, pipelines and real-world examples',
+   'Add types to scale your JS codebase safely',
+   'Reduce load time and boost UX metrics',
+   'Create interactive 3D scenes for the web',
+   'Unit, integration and E2E testing strategies',
+   'Authentication flows and secure sessions',
+];
+
+const CATEGORIES = [
+   'Web Development',
+   'Backend',
+   'Frontend',
+   'AI',
+   'Mobile Development',
+   'Databases',
+   'DevOps',
+];
+
+const TOPICS = [
+   'React',
+   'Node.js',
+   'Express',
+   'PostgreSQL',
+   'TypeScript',
+   'Three.js',
+   'Testing',
+   'Authentication',
+   'Performance',
+   'Machine Learning',
+];
+
+const LEVELS = ['beginner', 'intermediate', 'advanced', 'all-levels'];
+
+const LEARNING_OUTCOMES = {
+   React: [
+      'Build reusable components and custom hooks',
+      'Manage global state with Context API',
+      'Optimize component rendering and performance',
+      'Test React components with React Testing Library',
+   ],
+   'Node.js': [
+      'Design RESTful endpoints with Express',
+      'Handle authentication and authorization',
+      'Write production error handling and logging',
+      'Deploy Node apps and connect to databases',
+   ],
+   PostgreSQL: [
+      'Design normalized schemas and relations',
+      'Write advanced SQL queries and indexes',
+      'Use transactions and manage migrations',
+      'Tune queries for large datasets',
+   ],
+};
+
+const TARGET_AUDIENCE_EXAMPLES = [
+   'Junior developers who want to level up',
+   'Frontend engineers needing deeper React skills',
+   'Backend engineers who build REST APIs',
+   'Students preparing for real-world projects',
+];
+
+const REQUIREMENTS_EXAMPLES = [
+   'Basic JavaScript knowledge',
+   'Familiarity with HTML and CSS',
+   'Node.js (for backend courses)',
+   'Git and a code editor (VSCode recommended)',
+];
+
+/* ---------------------------
+  Helpers
+----------------------------*/
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const uniqueTagsFrom = (title, category) => {
+   const words = title
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .slice(0, 4);
+   return Array.from(new Set([category.toLowerCase(), ...words]));
+};
+
+/* ---------------------------
+  Seeder
+----------------------------*/
 const seedCourses = async () => {
    try {
       await mongoose.connect(connectionString);
@@ -43,19 +150,30 @@ const seedCourses = async () => {
       const courses = [];
 
       for (let i = 0; i < 20; i++) {
-         const sections = [];
+         // choose a main topic/category/title
+         const category = pick(CATEGORIES);
+         const topic = pick(TOPICS);
+         const title = `${pick(COURSE_TITLES)}${Math.random() < 0.25 ? ' — Practical Projects' : ''}`;
+         const subtitle = pick(SUBTITLES);
 
-         // ✅ 3 SECTIONS
+         const sections = [];
+         let totalLectureSeconds = 0;
+
+         // 3 sections each
          for (let s = 0; s < 3; s++) {
             const lectures = [];
 
-            // ✅ 4 LECTURES PER SECTION
+            // 4 lectures per section
             for (let l = 0; l < 4; l++) {
+               // realistic lecture durations: 3 — 25 minutes (in seconds)
+               const durationSecs = faker.number.int({ min: 180, max: 1500 }); // 180s = 3min, 1500s = 25min
+               totalLectureSeconds += durationSecs;
+
                lectures.push({
                   clientId: faker.string.uuid(),
-                  title: faker.lorem.words(3),
-                  description: faker.lorem.paragraph(),
-                  notes: faker.lorem.sentences(2),
+                  title: `${topic} — ${faker.hacker.verb()} ${faker.hacker.noun()}`, // e.g. "React — build component"
+                  description: `In this lecture we cover ${topic} ${faker.lorem.sentence(6)}.`,
+                  notes: `Key points:\n- ${faker.lorem.sentence()}\n- ${faker.lorem.sentence()}`,
                   order: l + 1,
                   video: {
                      url: VIDEO_POOL[
@@ -63,11 +181,12 @@ const seedCourses = async () => {
                      ],
                      fileName: 'lecture.mp4',
                      fileType: 'video/mp4',
-                     duration: faker.number.int({ min: 120, max: 900 }),
+                     // store duration in seconds (accurate simulated), can be shown or used later
+                     duration: durationSecs,
                   },
                   attachments: [
                      {
-                        title: faker.lorem.words(2),
+                        title: `${topic} example ${l + 1}`,
                         file: {
                            url: RANDOM_IMAGE(),
                            fileName: 'resource.jpg',
@@ -80,8 +199,8 @@ const seedCourses = async () => {
                         language: 'English',
                         file: {
                            url: RANDOM_IMAGE(),
-                           fileName: 'caption.jpg',
-                           fileType: 'image/jpeg',
+                           fileName: 'caption.vtt',
+                           fileType: 'text/vtt',
                         },
                      },
                   ],
@@ -90,15 +209,29 @@ const seedCourses = async () => {
 
             sections.push({
                clientId: faker.string.uuid(),
-               title: faker.lorem.words(3),
+               title: `${topic} — Part ${s + 1}`,
                order: s + 1,
                lectures,
             });
          }
 
-         const title = faker.lorem.words(4);
+         // trailer duration: 30 — 180 seconds
+         const trailerDuration = faker.number.int({ min: 30, max: 180 });
 
-         courses.push({
+         // compute course duration in hours (rounded to 1 decimal)
+         const hours =
+            Math.round(((totalLectureSeconds + trailerDuration) / 3600) * 10) /
+               10 || 0.1;
+
+         // assemble course
+         const chosenOutcomes = LEARNING_OUTCOMES[topic] || [
+            faker.hacker.phrase(),
+            faker.hacker.phrase(),
+            faker.hacker.phrase(),
+            faker.hacker.phrase(),
+         ];
+
+         const course = {
             instructor: faker.helpers.arrayElement(instructors)._id,
             status: faker.helpers.arrayElement([
                'draft',
@@ -107,31 +240,16 @@ const seedCourses = async () => {
             ]),
             basicInfo: {
                title,
-               subtitle: faker.lorem.sentence(),
-               category: faker.helpers.arrayElement([
-                  'Web Development',
-                  'Backend',
-                  'Frontend',
-                  'AI',
-                  'Mobile Development',
-               ]),
-               subCategory: faker.lorem.word(),
-               topic: faker.lorem.word(),
+               subtitle,
+               category,
+               subCategory: topic,
+               topic,
                primaryLanguage: 'English',
                subtitleLanguage: 'Arabic',
-               level: faker.helpers.arrayElement([
-                  'beginner',
-                  'intermediate',
-                  'advanced',
-                  'all-levels',
-               ]),
-               durationValue: faker.number.int({ min: 5, max: 40 }),
-               durationUnit: faker.helpers.arrayElement([
-                  'Day',
-                  'Week',
-                  'Month',
-                  'Hour',
-               ]),
+               level: faker.helpers.arrayElement(LEVELS),
+               // durationValue is the computed hours from lectures
+               durationValue: hours,
+               durationUnit: 'Hour',
             },
             advancedInfo: {
                thumbnail: {
@@ -145,20 +263,21 @@ const seedCourses = async () => {
                   ],
                   fileName: 'trailer.mp4',
                   fileType: 'video/mp4',
+                  duration: trailerDuration,
                },
-               description: faker.lorem.paragraph(),
-               whatYouWillLearn: Array.from({ length: 4 }, () =>
-                  faker.lorem.sentence()
-               ),
+               description: `This course focuses on ${topic} and is designed to help learners ${chosenOutcomes[0].toLowerCase()}. You will work on practical examples and build a mini project by the end.`,
+               whatYouWillLearn: chosenOutcomes,
                targetAudience: Array.from({ length: 3 }, () =>
-                  faker.lorem.sentence()
+                  pick(TARGET_AUDIENCE_EXAMPLES)
                ),
                requirements: Array.from({ length: 3 }, () =>
-                  faker.lorem.sentence()
+                  pick(REQUIREMENTS_EXAMPLES)
                ),
                thumbnailUrl: RANDOM_IMAGE(),
                trailerUrl:
                   VIDEO_POOL[Math.floor(Math.random() * VIDEO_POOL.length)],
+               // keep a total duration field (seconds) for internal use
+               totalDurationSeconds: totalLectureSeconds + trailerDuration,
             },
             curriculum: {
                sections,
@@ -167,19 +286,23 @@ const seedCourses = async () => {
                amount: faker.number.int({ min: 0, max: 300 }),
                currency: 'USD',
             },
-            tags: faker.lorem.words(5).split(' '),
+            tags: uniqueTagsFrom(title, category),
             version: 1,
             lastPublishedAt: new Date(),
-         });
+         };
+
+         courses.push(course);
       }
 
-      // ✅ IMPORTANT FIX: USE .save() TO TRIGGER SLUG MIDDLEWARE
+      // Save each course to trigger model middleware (slug, etc.)
       for (const course of courses) {
          const doc = new courseModel(course);
          await doc.save();
       }
 
-      console.log('✅ 20 Courses Seeded With Real Videos & Unsplash Images!');
+      console.log(
+         '✅ 20 Courses Seeded With Meaningful Data & Realistic Durations!'
+      );
       process.exit();
    } catch (err) {
       console.error('❌ Course Seeding Error:', err);

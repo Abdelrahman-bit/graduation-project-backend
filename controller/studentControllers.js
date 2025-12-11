@@ -31,8 +31,6 @@ export const enrollStudent = catchAsync(async (req, res, next) => {
       existing.unenrolledAt = undefined;
       await existing.save();
 
-      await existing.save();
-
       // Remove from wishlist if exists
       await wishlistModel.findOneAndDelete({ user: student, course });
 
@@ -40,8 +38,6 @@ export const enrollStudent = catchAsync(async (req, res, next) => {
          status: 'Re-enrolled successfully',
       });
    }
-
-   await enrollmentModel.create({ student, course });
 
    await enrollmentModel.create({ student, course });
 
@@ -260,8 +256,6 @@ export const updateProgress = catchAsync(async (req, res, next) => {
       // Direct progress update fallback (legacy or manual override)
       enrollment.progress = req.body.progress;
    }
-
-   await enrollment.save();
 
    await enrollment.save();
 
