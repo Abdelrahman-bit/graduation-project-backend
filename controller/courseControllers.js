@@ -258,7 +258,8 @@ export const deleteCourse = catchAsync(async (req, res, next) => {
 export const getAllCourses = catchAsync(async (req, res) => {
    const courses = await courseModel
       .find({ status: 'published' })
-      .select('-curriculum');
+      .select('-curriculum')
+      .populate('instructor', 'firstname lastname avatar');
    res.status(200).json({
       status: 'success',
       results: courses.length,

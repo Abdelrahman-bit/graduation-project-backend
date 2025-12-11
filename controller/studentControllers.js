@@ -31,12 +31,22 @@ export const enrollStudent = catchAsync(async (req, res, next) => {
       existing.unenrolledAt = undefined;
       await existing.save();
 
+      await existing.save();
+
+      // Remove from wishlist if exists
+      await wishlistModel.findOneAndDelete({ user: student, course });
+
       return res.status(200).json({
          status: 'Re-enrolled successfully',
       });
    }
 
    await enrollmentModel.create({ student, course });
+
+   await enrollmentModel.create({ student, course });
+
+   // Remove from wishlist if exists
+   await wishlistModel.findOneAndDelete({ user: student, course });
 
    res.status(201).json({
       status: 'Enrolled successfully',
@@ -99,7 +109,7 @@ export const getWishlist = catchAsync(async (req, res, next) => {
    const userId = req.user._id;
    const wishlist = await wishlistModel.find({ user: userId }).populate({
       path: 'course',
-      populate: { path: 'instructor', select: 'firstname lastname' },
+      populate: { path: 'instructor', select: 'firstname lastname avatar' },
    });
 
    res.status(200).json({
