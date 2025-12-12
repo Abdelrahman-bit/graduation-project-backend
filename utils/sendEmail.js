@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
 
 async function sendEmail(options) {
    const mailOptions = {
-      from: '"Support Team" E-tutor Website',
+      from: '"Support Team" Eduraa Website',
       to: options.email,
       subject: options.subject,
       text: options.text,
