@@ -2,6 +2,17 @@ import ChatGroup from '../models/chatGroupModel.js';
 import ChatMessage from '../models/chatMessageModel.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
+import Ably from 'ably';
+
+// Initialize Ably REST client for publishing
+const getAblyClient = () => {
+   const apiKey = process.env.ABLY_API_KEY;
+   if (!apiKey) {
+      console.warn('[Chat] ABLY_API_KEY not set, real-time updates disabled');
+      return null;
+   }
+   return new Ably.Rest(apiKey);
+};
 
 /**
  * Get all chat groups for the current user
@@ -162,13 +173,23 @@ export const sendMessage = catchAsync(async (req, res, next) => {
    // Populate sender info for response
    await message.populate('sender', 'firstname lastname avatar');
 
-   // Emit via Socket.IO if available
-   const io = req.app.get('io');
-   if (io) {
-      io.to(`chat:${groupId}`).emit('new_message', {
-         ...message.toObject(),
-         chatGroup: groupId,
-      });
+   // Publish message via Ably for real-time delivery
+   try {
+      const ably = getAblyClient();
+      if (ably) {
+         const channel = ably.channels.get(`chat:${groupId}`);
+         await channel.publish('message', {
+            ...message.toObject(),
+            chatGroup: groupId,
+         });
+         console.log(`[Chat] Message published to chat:${groupId}`);
+      }
+   } catch (ablyError) {
+      console.error(
+         '[Chat] Failed to publish message via Ably:',
+         ablyError.message
+      );
+      // Continue - message is saved, just real-time delivery failed
    }
 
    res.status(201).json({
@@ -212,13 +233,23 @@ export const updateChatSettings = catchAsync(async (req, res, next) => {
       runValidators: true,
    }).populate('course', 'basicInfo.title');
 
-   // Emit settings change via Socket.IO
-   const io = req.app.get('io');
-   if (io) {
-      io.to(`chat:${groupId}`).emit('settings_updated', {
-         groupId,
-         settings: updatedGroup.settings,
-      });
+   // Publish settings change via Ably for real-time updates
+   try {
+      const ably = getAblyClient();
+      if (ably) {
+         const channel = ably.channels.get(`chat:${groupId}`);
+         await channel.publish('settings_updated', {
+            groupId,
+            settings: updatedGroup.settings,
+         });
+         console.log(`[Chat] Settings update published to chat:${groupId}`);
+      }
+   } catch (ablyError) {
+      console.error(
+         '[Chat] Failed to publish settings update via Ably:',
+         ablyError.message
+      );
+      // Continue - the REST response will still be sent
    }
 
    res.status(200).json({

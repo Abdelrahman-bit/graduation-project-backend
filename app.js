@@ -15,6 +15,7 @@ import bookingRouter from './routes/bookingRoutes.js';
 import slotRouter from './routes/slotRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import chatRouter from './routes/chatRoutes.js';
+import ablyRouter from './routes/ablyRoutes.js';
 
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';
@@ -27,7 +28,7 @@ const app = express();
 // CORS must come FIRST before helmet to prevent header conflicts
 app.use(
    cors({
-      origin: 'http://localhost:3000',
+      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
       credentials: true,
    })
 );
@@ -68,6 +69,9 @@ app.use('/api/chat', aiRouter);
 
 // Course Chat Routes (Real-time messaging)
 app.use('/api/chats', chatRouter);
+
+// Ably Routes (Real-time token authentication)
+app.use('/api/ably', ablyRouter);
 
 app.use(globalErrorController);
 
