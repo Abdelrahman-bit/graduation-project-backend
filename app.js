@@ -73,6 +73,10 @@ app.use('/api/chats', chatRouter);
 // Ably Routes (Real-time token authentication)
 app.use('/api/ably', ablyRouter);
 
+// Notification Routes
+import notificationRouter from './routes/notificationRoutes.js';
+app.use('/api/notifications', notificationRouter);
+
 app.use(globalErrorController);
 
 export default app;
