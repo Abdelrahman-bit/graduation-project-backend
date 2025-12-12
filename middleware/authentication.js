@@ -45,4 +45,32 @@ const auth = catchAsync(async function (req, res, next) {
    next();
 });
 
+export const optionalAuth = catchAsync(async function (req, res, next) {
+   let token;
+   if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+   ) {
+      token = req.headers.authorization.split(' ')[1];
+   }
+
+   if (!token) {
+      return next();
+   }
+
+   try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+      const user = await userModel.findById(decoded.id);
+      if (user) {
+         req.user = user;
+      }
+   } catch (err) {
+      // If token is invalid/expired, we just treat them as guest (unauthenticated)
+      // or we could throw error. For now, let's treat as guest.
+      console.warn('Optional auth: Token invalid, proceeding as guest.');
+   }
+
+   next();
+});
+
 export default auth;

@@ -11,6 +11,7 @@ import {
    updateCourseAdvancedInfo,
    updateCourseBasicInfo,
    updateCourseCurriculum,
+   getPublicInstructorCourses,
 } from '../controller/courseControllers.js';
 // import { protect } from '../middleware/authMiddleware.js';
 import restrictTo from '../middleware/authorization.js';
@@ -19,6 +20,7 @@ import auth from '../middleware/authentication.js';
 const router = express.Router();
 
 router.route('/published').get(getAllCourses);
+router.get('/instructor/:instructorId', getPublicInstructorCourses);
 router.route('/:courseId').get(getCourseById);
 
 // Apply authentication and authorization middleware
