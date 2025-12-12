@@ -14,6 +14,7 @@ import hallRouter from './routes/hallRoutes.js';
 import bookingRouter from './routes/bookingRoutes.js';
 import slotRouter from './routes/slotRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import chatRouter from './routes/chatRoutes.js';
 
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';
@@ -64,6 +65,9 @@ app.use('/api/slot', slotRouter);
 // AI Chat Routes
 import aiRouter from './routes/aiRoutes.js';
 app.use('/api/chat', aiRouter);
+
+// Course Chat Routes (Real-time messaging)
+app.use('/api/chats', chatRouter);
 
 app.use(globalErrorController);
 

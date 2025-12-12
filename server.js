@@ -1,7 +1,10 @@
 import dotenv from 'dotenv';
 // configuration env File for Secret Data
+import { createServer } from 'http';
 import app from './app.js';
 import mongoose from 'mongoose';
+import initializeSocketServer from './services/socketServer.js';
+
 dotenv.config({
    path: './config.env',
 });
@@ -26,11 +29,18 @@ const connectDB = async () => {
 connectDB();
 
 // connecting to the Server
-
 const port = process.env.PORT || 5000;
 
-const server = app.listen(port, () => {
+// Create HTTP server and initialize Socket.IO
+const httpServer = createServer(app);
+const io = initializeSocketServer(httpServer);
+
+// Make io accessible to controllers via app
+app.set('io', io);
+
+const server = httpServer.listen(port, () => {
    console.log('Server is up & running on port ' + port);
+   console.log('Socket.IO is ready for connections');
 });
 
 // close the server gracefully (give the server time to finish all the currently pending tasks before ending )
