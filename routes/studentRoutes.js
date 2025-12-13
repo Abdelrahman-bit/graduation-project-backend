@@ -7,6 +7,12 @@ import {
    enrollStudent,
    unenrollStudent,
    getStudentCourses,
+   getStudentStats,
+   getWishlist,
+   addToWishlist,
+   removeFromWishlist,
+   updateProgress,
+   getEnrollment,
 } from '../controller/studentControllers.js';
 
 const router = express.Router();
@@ -15,12 +21,20 @@ const router = express.Router();
 router.use(auth);
 router.use(restrictTo('student'));
 
-// // add a Student to a course
-// router.post('/enroll/', enrollStudent);
-// // remove a Student from a course
+// add a Student to a course
+// Student Dashboard Stats
+router.get('/stats', getStudentStats);
 
-router.patch('/unEnroll/:courseId', unenrollStudent);
-
+// Enrollment & Progress
+router.post('/enroll/', enrollStudent);
+router.patch('/unenroll/:id', unenrollStudent);
 router.get('/my-courses', getStudentCourses);
+router.get('/enrollment/:courseId', getEnrollment);
+router.patch('/progress', updateProgress);
+
+// Wishlist
+router.get('/wishlist', getWishlist);
+router.post('/wishlist', addToWishlist);
+router.delete('/wishlist/:id', removeFromWishlist);
 
 export default router;

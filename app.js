@@ -18,6 +18,10 @@ import accessKeyRouter from './routes/accessKeyRoutes.js';
 import enrollmentRouter from './routes/enrollmentRoutes.js';
 import redeemRouter from './routes/redeemRoutes.js';
 
+import chatRouter from './routes/chatRoutes.js';
+import ablyRouter from './routes/ablyRoutes.js';
+import aiRouter from './routes/aiRoutes.js';
+
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';
 
@@ -25,12 +29,23 @@ import globalErrorController from './middleware/errorControllers.js';
 const app = express();
 
 // Global Middlewares
+
+// CORS must come FIRST before helmet to prevent header conflicts
+app.use(
+   cors({
+      origin:
+         process.env.FRONTEND_URL?.replace(/\/$/, '') ||
+         'http://localhost:3000',
+      credentials: true,
+   })
+);
+
 // Helmet : auto includes the Security protocols / headers along each request
 app.use(helmet());
 
 //(express-rate-limit) will limit the number of request coming from same domain in a ranged time (help against prudeForce, DoS attacks)
 const limiter = rateLimit({
-   limit: 100,
+   limit: 1000,
    windowMs: 60 * 60 * 1000, // 1 hour
    message: 'Max request count Reached try again in 1 hour',
 });
@@ -38,14 +53,6 @@ app.use('/api', limiter);
 
 // well confiqure each request to json to be able to extract body data
 app.use(express.json());
-
-// cors will allow frontend requests coming to the backend from different domains
-app.use(
-   cors({
-      origin: 'http://localhost:3000',
-      credentials: true,
-   })
-);
 
 // Routes
 // authentication routes
@@ -65,6 +72,20 @@ app.use('/api/redeem', redeemRouter);
 app.use('/api/hall', hallRouter);
 app.use('/api/slot', slotRouter);
 app.use('/api/booking', bookingRouter);
+
+// AI Chat Routes
+
+app.use('/api/chat', aiRouter);
+
+// Course Chat Routes (Real-time messaging)
+app.use('/api/chats', chatRouter);
+
+// Ably Routes (Real-time token authentication)
+app.use('/api/ably', ablyRouter);
+
+// Notification Routes
+import notificationRouter from './routes/notificationRoutes.js';
+app.use('/api/notifications', notificationRouter);
 
 app.use(globalErrorController);
 

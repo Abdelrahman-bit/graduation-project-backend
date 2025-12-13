@@ -19,6 +19,15 @@ const enrollmentSchema = new Schema(
          enum: ['active', 'pending', 'unenrolled'],
          default: 'active',
       },
+      progress: { type: Number, default: 0 },
+      completedLectures: [
+         {
+            lectureId: { type: String },
+            completedAt: { type: Date, default: Date.now },
+         },
+      ],
+      lastAccessed: { type: Date, default: Date.now },
+      isDeleted: { type: Boolean, default: false },
 
       // subscription info
       startsAt: {

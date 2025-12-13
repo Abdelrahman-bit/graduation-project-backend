@@ -26,8 +26,8 @@ export const seedUsers = async () => {
       // ✅ 10 INSTRUCTORS
       for (let i = 0; i < 10; i++) {
          users.push({
-            name: faker.person.fullName(),
-            username: `instructor_${i}_${faker.internet.username()}`,
+            firstname: faker.person.firstName(),
+            lastname: faker.person.lastName(),
             email: faker.internet.email().toLowerCase(),
             password: '1234567890',
             confirmPassword: '1234567890',
@@ -40,8 +40,8 @@ export const seedUsers = async () => {
       // ✅ 5 STUDENTS
       for (let i = 0; i < 5; i++) {
          users.push({
-            name: faker.person.fullName(),
-            username: `student_${i}_${faker.internet.username()}`,
+            firstname: faker.person.firstName(),
+            lastname: faker.person.lastName(),
             email: faker.internet.email().toLowerCase(),
             password: '1234567890',
             confirmPassword: '1234567890',
@@ -52,7 +52,10 @@ export const seedUsers = async () => {
       }
 
       // ✅ Insert into DB
-      await userModel.insertMany(users);
+      for (const user of users) {
+         const doc = new userModel(user);
+         await doc.save();
+      }
 
       console.log('✅ 10 Instructors + 5 Students Successfully Seeded!');
       process.exit();

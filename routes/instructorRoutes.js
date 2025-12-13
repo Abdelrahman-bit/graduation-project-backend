@@ -1,15 +1,20 @@
 import express from 'express';
-
-// controllers
-import { requestApplication } from '../controller/instructorControllers.js';
+import {
+   requestApplication,
+   getInstructorDashboardStats,
+} from '../controller/instructorControllers.js';
+import auth from '../middleware/authentication.js';
 import { createAccessKey } from '../controller/accessCodeControllers.js';
 // middleware
-import auth from '../middleware/authentication.js';
 import restrictTo from '../middleware/authorization.js';
 
 const router = express.Router();
 
-// authentication routes
+// Public routes
 router.post('/applicationRequest', requestApplication);
+
+// Protected routes
+router.use(auth);
+router.get('/stats', getInstructorDashboardStats);
 
 export default router;

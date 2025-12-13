@@ -4,16 +4,15 @@ import bcrypt from 'bcrypt';
 
 const userSchema = new Schema(
    {
-      name: {
+      firstname: {
          type: String,
-         required: [true, 'User name is required'],
-         minlength: [3, 'Password must be at least 3 characters'],
+         required: [true, 'User first name is required'],
+         minlength: [3, 'First name must be at least 3 characters'],
       },
-      username: {
+      lastname: {
          type: String,
-         required: [true, 'User name is required'],
-         minlength: [3, 'Username must be at least 3 characters'],
-         unique: true,
+         required: [true, 'User last name is required'],
+         minlength: [3, 'Last name must be at least 3 characters'],
       },
       email: {
          type: String,
@@ -51,6 +50,13 @@ const userSchema = new Schema(
          type: String,
          default:
             'https://res.cloudinary.com/dzcjymfa3/image/upload/v1764872164/5da8b2bf-3bee-4eee-b2c9-009979981263.png',
+      },
+      title: {
+         type: String,
+         maxLength: [60, 'Your title cannot exceed 60 characters'],
+      },
+      biography: {
+         type: String,
       },
       passwordUpdatedAt: Date,
       passwordResetToken: String,
