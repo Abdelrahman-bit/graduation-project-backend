@@ -5,7 +5,7 @@ import enrollmentModel from '../models/enrollmentModel.js';
 import courseModel from '../models/courseModel.js';
 
 export const redeemAccessKey = catchAsync(async (req, res, next) => {
-   const { accessKey } = req.params;
+   const { accessKey } = req.body;
    // check if the access Key exists & is valid not expired or already used
    if (!accessKey) {
       return next(new AppError('Access key is required', 400));
@@ -30,6 +30,8 @@ export const redeemAccessKey = catchAsync(async (req, res, next) => {
 
    validAccessKey.usedCount += 1;
    await validAccessKey.save();
+
+   // code
 
    res.status(200).json({
       status: 'success',

@@ -75,7 +75,6 @@ export const getEnrollmentRequests = catchAsync(async (req, res, next) => {
 export const approveEnrollmentRequest = catchAsync(async (req, res, next) => {
    const { requestId } = req.params;
    const instructorId = req.user.id;
-   console.log(requestId, instructorId);
    //    check if the request exists
    const request = await enrollmentRequestModel
       .findById(requestId)
@@ -129,12 +128,12 @@ export const approveEnrollmentRequest = catchAsync(async (req, res, next) => {
    // send email to student with access code
    const emailDetails = {
       email,
-      subject: 'E-Tutor Course Enrollment Update',
+      subject: 'Eduraa Course Enrollment Update',
       text: `Hello ${request.student.name},Contratulations! Your enrollment request for the course "${course.title}" has been approved.
 You can use the following access code to enroll in the course:
-Access Code: ${newAccessKey.key}
+Access Code: ${newAccessKey.key} , Course Link ${process.env.NODE_ENV === 'production' ? `${process.env.FRONTEND_URL}/all-courses/${course._id}` : 'http://localhost:3000'}/all-courses/${course._id}
    Regards,
-   E-Tutor Team`,
+   Eduraa Team`,
    };
    await sendEmail(emailDetails);
 
@@ -182,11 +181,11 @@ export const rejectEnrollementRequest = catchAsync(async (req, res, next) => {
    // send email to student with access code
    const emailDetails = {
       email,
-      subject: 'E-Tutor Course Enrollment Update',
+      subject: 'Eduraa Course Enrollment Update',
       text: `Hello ${request.student.name},Unfortunately! we regret to inform  Your enrollment request for the course "${course.title}" has been rejected.
       hope you have a great learning experience with us in the future.
    Regards,
-   E-Tutor Team`,
+   Eduraa Team`,
    };
    await sendEmail(emailDetails);
 
