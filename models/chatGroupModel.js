@@ -44,6 +44,12 @@ const chatGroupSchema = new Schema(
          type: Date,
          default: null,
       },
+      // Unread message counts per member (userId -> count)
+      unreadCounts: {
+         type: Map,
+         of: Number,
+         default: new Map(),
+      },
    },
    {
       timestamps: true,
@@ -115,6 +121,44 @@ chatGroupSchema.statics.removeMember = async function (courseId, userId) {
       { $pull: { members: userId } },
       { new: true }
    );
+};
+
+// Increment unread count for all members except the sender
+chatGroupSchema.statics.incrementUnreadCounts = async function (
+   groupId,
+   senderId
+) {
+   const group = await this.findById(groupId);
+   if (!group) return null;
+
+   const updates = {};
+   for (const memberId of group.members) {
+      if (memberId.toString() !== senderId.toString()) {
+         const currentCount = group.unreadCounts?.get(memberId.toString()) || 0;
+         updates[`unreadCounts.${memberId.toString()}`] = currentCount + 1;
+      }
+   }
+
+   if (Object.keys(updates).length > 0) {
+      return this.findByIdAndUpdate(groupId, { $set: updates }, { new: true });
+   }
+   return group;
+};
+
+// Reset unread count for a specific user
+chatGroupSchema.statics.resetUnreadCount = async function (groupId, userId) {
+   return this.findByIdAndUpdate(
+      groupId,
+      { $set: { [`unreadCounts.${userId.toString()}`]: 0 } },
+      { new: true }
+   );
+};
+
+// Get unread count for a specific user
+chatGroupSchema.statics.getUnreadCount = async function (groupId, userId) {
+   const group = await this.findById(groupId).select('unreadCounts').lean();
+   if (!group || !group.unreadCounts) return 0;
+   return group.unreadCounts[userId.toString()] || 0;
 };
 
 const ChatGroup = mongoose.model('ChatGroup', chatGroupSchema);

@@ -1,7 +1,19 @@
 import ChatGroup from '../models/chatGroupModel.js';
 import ChatMessage from '../models/chatMessageModel.js';
+import Notification from '../models/notificationModel.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
+import Ably from 'ably';
+
+// Initialize Ably REST client for publishing
+const getAblyClient = () => {
+   const apiKey = process.env.ABLY_API_KEY;
+   if (!apiKey) {
+      console.warn('[Chat] ABLY_API_KEY not set, real-time updates disabled');
+      return null;
+   }
+   return new Ably.Rest(apiKey);
+};
 
 /**
  * Get all chat groups for the current user
@@ -31,10 +43,11 @@ export const getUserChatGroups = catchAsync(async (req, res, next) => {
       .sort({ lastMessageAt: -1, updatedAt: -1 })
       .lean();
 
-   // Add member count for each group
+   // Add member count and unread count for each group
    const groupsWithMeta = chatGroups.map((group) => ({
       ...group,
       memberCount: group.members?.length || 0,
+      unreadCount: group.unreadCounts?.[userId.toString()] || 0,
    }));
 
    res.status(200).json({
@@ -111,6 +124,12 @@ export const getGroupMessages = catchAsync(async (req, res, next) => {
       limit,
    });
 
+   // Reset unread count for this user when they view messages
+   await ChatGroup.resetUnreadCount(groupId, userId);
+
+   // Mark notifications for this group as read
+   await Notification.markGroupAsRead(userId, groupId);
+
    res.status(200).json({
       status: 'success',
       data: result.messages,
@@ -130,7 +149,10 @@ export const sendMessage = catchAsync(async (req, res, next) => {
       return next(new AppError('Message content is required', 400));
    }
 
-   const chatGroup = await ChatGroup.findById(groupId);
+   const chatGroup = await ChatGroup.findById(groupId).populate(
+      'course',
+      'basicInfo.title'
+   );
 
    if (!chatGroup) {
       return next(new AppError('Chat group not found', 404));
@@ -160,15 +182,90 @@ export const sendMessage = catchAsync(async (req, res, next) => {
    await ChatGroup.findByIdAndUpdate(groupId, { lastMessageAt: new Date() });
 
    // Populate sender info for response
-   await message.populate('sender', 'firstname lastname avatar');
+   await message.populate('sender', 'firstname lastname avatar role');
 
-   // Emit via Socket.IO if available
-   const io = req.app.get('io');
-   if (io) {
-      io.to(`chat:${groupId}`).emit('new_message', {
-         ...message.toObject(),
-         chatGroup: groupId,
+   // Check if sender is instructor
+   const isInstructorMessage = chatGroup.admin.toString() === userId.toString();
+   const groupName = chatGroup.course?.basicInfo?.title || 'Course Chat';
+
+   // Increment unread counts for all members (except sender)
+   await ChatGroup.incrementUnreadCounts(groupId, userId);
+
+   // Create notifications for all members (except sender)
+   const notificationPromises = chatGroup.members
+      .filter((memberId) => memberId.toString() !== userId.toString())
+      .map(async (memberId) => {
+         try {
+            const notification = await Notification.createMessageNotification({
+               recipientId: memberId,
+               senderId: userId,
+               senderInfo: {
+                  firstname: message.sender.firstname,
+                  lastname: message.sender.lastname,
+                  avatar: message.sender.avatar,
+                  role:
+                     message.sender.role ||
+                     (isInstructorMessage ? 'instructor' : 'student'),
+               },
+               groupId,
+               groupName,
+               messageId: message._id,
+               messagePreview: content.trim(),
+               isInstructor: isInstructorMessage,
+            });
+
+            // Send real-time notification via Ably
+            try {
+               const ably = getAblyClient();
+               if (ably) {
+                  const notifChannel = ably.channels.get(
+                     `notifications:${memberId.toString()}`
+                  );
+                  await notifChannel.publish('new_notification', {
+                     ...notification.toObject(),
+                     isInstructorMessage,
+                  });
+               }
+            } catch (ablyErr) {
+               console.error(
+                  '[Chat] Failed to send notification via Ably:',
+                  ablyErr.message
+               );
+            }
+
+            return notification;
+         } catch (err) {
+            console.error(
+               `[Chat] Failed to create notification for ${memberId}:`,
+               err.message
+            );
+            return null;
+         }
       });
+
+   // Don't await all notifications - let them complete in background
+   Promise.all(notificationPromises).catch((err) => {
+      console.error('[Chat] Error creating notifications:', err);
+   });
+
+   // Publish message via Ably for real-time delivery (chat channel)
+   try {
+      const ably = getAblyClient();
+      if (ably) {
+         const channel = ably.channels.get(`chat:${groupId}`);
+         await channel.publish('message', {
+            ...message.toObject(),
+            chatGroup: groupId,
+            isInstructorMessage,
+         });
+         console.log(`[Chat] Message published to chat:${groupId}`);
+      }
+   } catch (ablyError) {
+      console.error(
+         '[Chat] Failed to publish message via Ably:',
+         ablyError.message
+      );
+      // Continue - message is saved, just real-time delivery failed
    }
 
    res.status(201).json({
@@ -212,13 +309,23 @@ export const updateChatSettings = catchAsync(async (req, res, next) => {
       runValidators: true,
    }).populate('course', 'basicInfo.title');
 
-   // Emit settings change via Socket.IO
-   const io = req.app.get('io');
-   if (io) {
-      io.to(`chat:${groupId}`).emit('settings_updated', {
-         groupId,
-         settings: updatedGroup.settings,
-      });
+   // Publish settings change via Ably for real-time updates
+   try {
+      const ably = getAblyClient();
+      if (ably) {
+         const channel = ably.channels.get(`chat:${groupId}`);
+         await channel.publish('settings_updated', {
+            groupId,
+            settings: updatedGroup.settings,
+         });
+         console.log(`[Chat] Settings update published to chat:${groupId}`);
+      }
+   } catch (ablyError) {
+      console.error(
+         '[Chat] Failed to publish settings update via Ably:',
+         ablyError.message
+      );
+      // Continue - the REST response will still be sent
    }
 
    res.status(200).json({

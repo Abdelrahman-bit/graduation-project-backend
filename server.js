@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 import { createServer } from 'http';
 import app from './app.js';
 import mongoose from 'mongoose';
-import initializeSocketServer from './services/socketServer.js';
 
 dotenv.config({
    path: './config.env',
@@ -31,16 +30,12 @@ connectDB();
 // connecting to the Server
 const port = process.env.PORT || 5000;
 
-// Create HTTP server and initialize Socket.IO
+// Create HTTP server (no longer using Socket.IO - using Ably for real-time)
 const httpServer = createServer(app);
-const io = initializeSocketServer(httpServer);
-
-// Make io accessible to controllers via app
-app.set('io', io);
 
 const server = httpServer.listen(port, () => {
    console.log('Server is up & running on port ' + port);
-   console.log('Socket.IO is ready for connections');
+   console.log('Real-time features powered by Ably');
 });
 
 // close the server gracefully (give the server time to finish all the currently pending tasks before ending )
