@@ -4,6 +4,9 @@ import {
    getInstructorDashboardStats,
 } from '../controller/instructorControllers.js';
 import auth from '../middleware/authentication.js';
+import { createAccessKey } from '../controller/accessCodeControllers.js';
+// middleware
+import restrictTo from '../middleware/authorization.js';
 
 const router = express.Router();
 
