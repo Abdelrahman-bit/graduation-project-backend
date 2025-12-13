@@ -1,6 +1,7 @@
 import courseModel from '../models/courseModel.js';
 import enrollmentModel from '../models/enrollmentModel.js';
 import wishlistModel from '../models/wishlistModel.js';
+import ChatGroup from '../models/chatGroupModel.js';
 
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
@@ -31,6 +32,19 @@ export const enrollStudent = catchAsync(async (req, res, next) => {
       existing.unenrolledAt = undefined;
       await existing.save();
 
+      // Add student back to chat group
+      try {
+         await ChatGroup.addMember(course, student);
+         console.log(
+            `[Enrollment] Student ${student} re-added to chat group for course ${course}`
+         );
+      } catch (chatError) {
+         console.error(
+            '[Enrollment] Failed to add student to chat group:',
+            chatError.message
+         );
+      }
+
       // Remove from wishlist if exists
       await wishlistModel.findOneAndDelete({ user: student, course });
 
@@ -40,6 +54,19 @@ export const enrollStudent = catchAsync(async (req, res, next) => {
    }
 
    await enrollmentModel.create({ student, course });
+
+   // Add student to chat group
+   try {
+      await ChatGroup.addMember(course, student);
+      console.log(
+         `[Enrollment] Student ${student} added to chat group for course ${course}`
+      );
+   } catch (chatError) {
+      console.error(
+         '[Enrollment] Failed to add student to chat group:',
+         chatError.message
+      );
+   }
 
    // Remove from wishlist if exists
    await wishlistModel.findOneAndDelete({ user: student, course });
@@ -74,6 +101,19 @@ export const unenrollStudent = catchAsync(async (req, res, next) => {
    enrolledStudent.isDeleted = true;
    enrolledStudent.unenrolledAt = new Date();
    await enrolledStudent.save();
+
+   // 4) Remove student from chat group
+   try {
+      await ChatGroup.removeMember(course, student);
+      console.log(
+         `[Unenrollment] Student ${student} removed from chat group for course ${course}`
+      );
+   } catch (chatError) {
+      console.error(
+         '[Unenrollment] Failed to remove student from chat group:',
+         chatError.message
+      );
+   }
 
    res.status(200).json({
       status: 'Unenrolled successfully',

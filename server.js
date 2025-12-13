@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 // configuration env File for Secret Data
+import { createServer } from 'http';
 import app from './app.js';
 import mongoose from 'mongoose';
+
 dotenv.config({
    path: './config.env',
 });
@@ -26,11 +28,14 @@ const connectDB = async () => {
 connectDB();
 
 // connecting to the Server
-
 const port = process.env.PORT || 5000;
 
-const server = app.listen(port, () => {
+// Create HTTP server (no longer using Socket.IO - using Ably for real-time)
+const httpServer = createServer(app);
+
+const server = httpServer.listen(port, () => {
    console.log('Server is up & running on port ' + port);
+   console.log('Real-time features powered by Ably');
 });
 
 // close the server gracefully (give the server time to finish all the currently pending tasks before ending )

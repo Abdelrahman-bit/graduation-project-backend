@@ -1,5 +1,6 @@
 import { deleteResource } from '../utils/cloudinary.js';
 import courseModel from '../models/courseModel.js';
+import ChatGroup from '../models/chatGroupModel.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 import mongoose from 'mongoose';
@@ -29,6 +30,24 @@ export const createCourseDraft = catchAsync(async (req, res, next) => {
       advancedInfo: req.body.advancedInfo || {},
       curriculum: req.body.curriculum || { sections: [] },
    });
+
+   // Create chat group for the course with instructor as admin
+   try {
+      await ChatGroup.create({
+         course: course._id,
+         admin: req.user._id,
+         members: [req.user._id],
+      });
+      console.log(
+         `[CourseController] Chat group created for course ${course._id}`
+      );
+   } catch (chatError) {
+      console.error(
+         '[CourseController] Failed to create chat group:',
+         chatError.message
+      );
+      // Don't fail the course creation if chat group fails
+   }
 
    res.status(201).json({
       status: 'success',
