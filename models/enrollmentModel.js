@@ -2,19 +2,49 @@ import mongoose, { Schema } from 'mongoose';
 
 const enrollmentSchema = new Schema(
    {
-      student: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-      course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+      student: {
+         type: Schema.Types.ObjectId,
+         ref: 'User',
+         required: true,
+      },
+
+      course: {
+         type: Schema.Types.ObjectId,
+         ref: 'Course',
+         required: true,
+      },
+
       status: {
          type: String,
-         enum: ['enrolled', 'unenrolled'],
-         default: 'enrolled',
+         enum: ['active', 'pending', 'unenrolled'],
+         default: 'active',
       },
-      unenrolledAt: { type: Date },
+
+      // subscription info
+      startsAt: {
+         type: Date,
+         default: Date.now,
+      },
+
+      expiresAt: {
+         type: Date,
+         required: true,
+      },
+
+      // audit / history
+      unenrolledAt: Date,
+
+      lastRenewedAt: Date,
+
+      accessKeyUsed: {
+         type: Schema.Types.ObjectId,
+         ref: 'AccessKey',
+      },
    },
    { timestamps: true }
 );
 
-// Make sure user cannot enroll same course twice
+// prevent duplicate enrollments
 enrollmentSchema.index({ student: 1, course: 1 }, { unique: true });
 
 const enrollmentModel = mongoose.model('Enrollment', enrollmentSchema);

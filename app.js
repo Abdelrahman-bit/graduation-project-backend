@@ -14,6 +14,9 @@ import hallRouter from './routes/hallRoutes.js';
 import bookingRouter from './routes/bookingRoutes.js';
 import slotRouter from './routes/slotRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import accessKeyRouter from './routes/accessKeyRoutes.js';
+import enrollmentRouter from './routes/enrollmentRoutes.js';
+import redeemRouter from './routes/redeemRoutes.js';
 
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';
@@ -47,18 +50,21 @@ app.use(
 // Routes
 // authentication routes
 app.use('/api/auth', authRouter);
-app.use('/api/admin', adminRouter);
 
 // users routes
+app.use('/api/admin', adminRouter);
 app.use('/api/instructor', instructorRouter);
 app.use('/api/student', studentRouter);
 app.use('/api/courses', courseRouter);
 app.use('/api/user', userRouter);
 
 // features routes
+app.use('/api/enrollment', enrollmentRouter);
+app.use('/api/accessKey', accessKeyRouter);
+app.use('/api/redeem', redeemRouter);
 app.use('/api/hall', hallRouter);
-app.use('/api/booking', bookingRouter);
 app.use('/api/slot', slotRouter);
+app.use('/api/booking', bookingRouter);
 
 app.use(globalErrorController);
 

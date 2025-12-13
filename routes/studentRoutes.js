@@ -15,10 +15,11 @@ const router = express.Router();
 router.use(auth);
 router.use(restrictTo('student'));
 
-// add a Student to a course
-router.post('/enroll/', enrollStudent);
-// remove a Student from a course
-router.patch('/unenroll/:id', unenrollStudent);
+// // add a Student to a course
+// router.post('/enroll/', enrollStudent);
+// // remove a Student from a course
+
+router.patch('/unEnroll/:courseId', unenrollStudent);
 
 router.get('/my-courses', getStudentCourses);
 
