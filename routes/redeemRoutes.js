@@ -13,6 +13,6 @@ router.use(auth);
 router.use(restrictTo('student'));
 
 // Redeem an Access Key
-router.post('/accessKey', redeemAccessKey);
+router.post('/', redeemAccessKey);
 
 export default router;

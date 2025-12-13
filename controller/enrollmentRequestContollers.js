@@ -63,7 +63,7 @@ export const getEnrollmentRequests = catchAsync(async (req, res, next) => {
    const instructorId = req.user._id;
    const requests = await enrollmentRequestModel
       .find({ instructor: instructorId, status: 'pending' })
-      .populate('student', 'name email')
+      .populate('student', 'firstname lastname email')
       .populate('course', 'basicInfo');
    res.status(200).json({
       status: 'success',
@@ -78,7 +78,8 @@ export const approveEnrollmentRequest = catchAsync(async (req, res, next) => {
    //    check if the request exists
    const request = await enrollmentRequestModel
       .findById(requestId)
-      .populate('student', 'name email');
+      .populate('student', 'firstname lastname email');
+
    const email = request.student.email;
    if (!request) {
       return next(new AppError('Enrollement Request not found', 404));
@@ -129,11 +130,39 @@ export const approveEnrollmentRequest = catchAsync(async (req, res, next) => {
    const emailDetails = {
       email,
       subject: 'Eduraa Course Enrollment Update',
-      text: `Hello ${request.student.name},Contratulations! Your enrollment request for the course "${course.title}" has been approved.
-You can use the following access code to enroll in the course:
-Access Code: ${newAccessKey.key} , Course Link ${process.env.NODE_ENV === 'production' ? `${process.env.FRONTEND_URL}/all-courses/${course._id}` : 'http://localhost:3000'}/all-courses/${course._id}
-   Regards,
-   Eduraa Team`,
+      html: `
+    <p>
+      Hello <strong>${request.student.firstname} ${request.student.lastname}</strong>,
+    </p>
+
+    <p>
+      Congratulations! 🎉<br />
+      Your enrollment request for the course
+      <strong>"${course.basicInfo.title}"</strong> has been approved.
+    </p>
+
+    <p>
+      You can use the following access code to enroll in the course:
+    </p>
+
+    <p style="font-size:18px;">
+      <strong>Access Code:</strong>
+      <span style="color:#2d3142;"><b>${newAccessKey.key}</b></span>
+    </p>
+
+    <p>
+      👉 <a href="${courseLink}" target="_blank">
+        Click here to access the course
+      </a>
+    </p>
+
+    <br />
+
+    <p>
+      Regards,<br />
+      <strong>Eduraa Team</strong>
+    </p>
+  `,
    };
    await sendEmail(emailDetails);
 

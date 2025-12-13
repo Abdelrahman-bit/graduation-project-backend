@@ -28,10 +28,16 @@ export const redeemAccessKey = catchAsync(async (req, res, next) => {
       return next(new AppError('Access key usage limit reached', 400));
    }
 
+   // create a new student enrollment
+   await enrollmentModel.create({
+      student: req.user._id,
+      course: course._id,
+      expiresAt: Date.now() + validAccessKey.durationDays * 24 * 60 * 60 * 1000,
+      accessKeyUsed: validAccessKey._id,
+   });
+
    validAccessKey.usedCount += 1;
    await validAccessKey.save();
-
-   // code
 
    res.status(200).json({
       status: 'success',
