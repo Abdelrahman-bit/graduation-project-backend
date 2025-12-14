@@ -4,6 +4,7 @@ import express, { request } from 'express';
 import {
    requestEnrollment,
    getEnrollmentRequests,
+   getMyEnrollmentRequestStatus,
    approveEnrollmentRequest,
    rejectEnrollementRequest,
 } from '../controller/enrollmentRequestContollers.js';
@@ -15,13 +16,20 @@ import restrictTo from '../middleware/authorization.js';
 const router = express.Router();
 
 router.use(auth);
-// authentication routes
 
+// Student routes
 router.post(
    '/requestEnroll/:courseId',
    restrictTo('student'),
    requestEnrollment
 );
+router.get(
+   '/my-request/:courseId',
+   restrictTo('student'),
+   getMyEnrollmentRequestStatus
+);
+
+// Instructor routes
 router.get('/requests', restrictTo('instructor'), getEnrollmentRequests);
 router.patch(
    '/requests/:requestId/approve',
