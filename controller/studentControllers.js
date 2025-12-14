@@ -53,7 +53,10 @@ export const enrollStudent = catchAsync(async (req, res, next) => {
       });
    }
 
-   await enrollmentModel.create({ student, course });
+   const expiresAt = new Date();
+   expiresAt.setFullYear(expiresAt.getFullYear() + 1); // Default 1 year access
+
+   await enrollmentModel.create({ student, course, expiresAt });
 
    // Add student to chat group
    try {
@@ -78,9 +81,7 @@ export const enrollStudent = catchAsync(async (req, res, next) => {
 
 export const unenrollStudent = catchAsync(async (req, res, next) => {
    const student = req.user._id;
-   const course = req.params.id;
-
-   console.log(student, course);
+   const course = req.params.courseId;
 
    if (!course) {
       return next(new AppError('Course ID is required', 400));

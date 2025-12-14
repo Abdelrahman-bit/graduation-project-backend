@@ -40,7 +40,7 @@ const hallSchema = new Schema(
 
       hourlyPrice: {
          type: Number,
-         min: [100, 'hourlyPrice must be at least 100 EGP/hour'],
+         min: [0, 'hourlyPrice must be at least 0 EGP/hour'],
          required: true,
       },
 
