@@ -19,7 +19,7 @@ export const createSlot = catchAsync(async (req, res, next) => {
       endTime: new Date(endTime),
    });
 
-   if (existingSlot) {
+   if (existingSlot.length > 0) {
       return next(new AppError('Slot already Exists', 400));
    }
 
@@ -44,13 +44,33 @@ export const updateSlot = catchAsync(async (req, res, next) => {
    const { id } = req.params;
    const { startTime, endTime } = req.body;
 
+   const currentSlot = await slotmodel.findById(id);
+   if (!currentSlot) return next(new AppError('Slot not found', 404));
+
+   // Check for overlaps with other slots in the same hall
+   // (StartA < EndB) && (EndA > StartB)
+   const overlappingSlot = await slotmodel.findOne({
+      hall: currentSlot.hall,
+      _id: { $ne: id }, // Exclude current slot
+      $or: [
+         {
+            startTime: { $lt: new Date(endTime) },
+            endTime: { $gt: new Date(startTime) },
+         },
+      ],
+   });
+
+   if (overlappingSlot) {
+      return next(
+         new AppError('This time slot overlaps with an existing slot.', 400)
+      );
+   }
+
    const slot = await slotmodel.findByIdAndUpdate(
       id,
       { startTime, endTime },
       { new: true, runValidators: true }
    );
-
-   if (!slot) return next(new AppError('Slot not found', 404));
 
    res.status(200).json({
       status: 'success',

@@ -4,6 +4,7 @@ import restrictTo from '../middleware/authorization.js';
 import {
    createBooking,
    getMyBookings,
+   cancelBooking,
    // updateBookingStatus,
 } from '../controller/bookingControllers.js';
 
@@ -20,5 +21,6 @@ router
 
 // Update booking status (admin) (take the booking Id in params & status in body)
 // router.patch('/:id', restrictTo('admin'), updateBookingStatus);
+router.delete('/:id', cancelBooking);
 
 export default router;

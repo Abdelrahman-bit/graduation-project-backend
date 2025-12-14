@@ -53,7 +53,10 @@ export const enrollStudent = catchAsync(async (req, res, next) => {
       });
    }
 
-   await enrollmentModel.create({ student, course });
+   const expiresAt = new Date();
+   expiresAt.setFullYear(expiresAt.getFullYear() + 1); // Default 1 year access
+
+   await enrollmentModel.create({ student, course, expiresAt });
 
    // Add student to chat group
    try {
