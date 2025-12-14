@@ -46,14 +46,14 @@ export const requestApplication = catchAsync(async (req, res, next) => {
    // 4) Send confirm to the User
    const emailDetails = {
       email,
-      subject: 'E-Tutor Application Recieved',
+      subject: 'Eduraa Application Recieved',
       text: `Hello ${firstname} ${lastname},
 
-We have recieved your application to become an instructor at E-Tutor.
+We have recieved your application to become an instructor at Eduraa.
 We will get back to you shortly after reviewing your application.
 
 Regards,
-E-Tutor Team`,
+Eduraa Team`,
    };
    await sendEmail(emailDetails);
 
