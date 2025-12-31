@@ -21,6 +21,7 @@ import redeemRouter from './routes/redeemRoutes.js';
 import chatRouter from './routes/chatRoutes.js';
 import ablyRouter from './routes/ablyRoutes.js';
 import aiRouter from './routes/aiRoutes.js';
+import statsRouter from './routes/statsRoutes.js';
 
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';
@@ -86,6 +87,9 @@ app.use('/api/ably', ablyRouter);
 // Notification Routes
 import notificationRouter from './routes/notificationRoutes.js';
 app.use('/api/notifications', notificationRouter);
+
+// Public Stats Routes (no auth required)
+app.use('/api/stats', statsRouter);
 
 app.use(globalErrorController);
 
