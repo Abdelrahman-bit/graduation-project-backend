@@ -7,6 +7,7 @@ import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 import crypto from 'crypto';
 import sendEmail from '../utils/sendEmail.js';
+import { getInstructorRatingStats } from './ratingController.js';
 
 export const getApplicationRequests = catchAsync(async (req, res, next) => {
    const applications = await applicationModel.find({ status: 'pending' });
@@ -422,11 +423,26 @@ export const getInstructor = catchAsync(async (req, res, next) => {
 
    const courses = await courseModel.find({ instructor: instructor._id });
 
+   // Get rating stats for instructor's courses
+   const ratingStats = await getInstructorRatingStats(instructor._id);
+
+   // Calculate total students enrolled in instructor's courses
+   const courseIds = courses.map((c) => c._id);
+   const totalStudentsAgg = await enrollmentModel.aggregate([
+      { $match: { course: { $in: courseIds }, isDeleted: false } },
+      { $group: { _id: '$student' } },
+      { $count: 'total' },
+   ]);
+   const totalStudents = totalStudentsAgg[0]?.total || 0;
+
    res.status(200).json({
       status: 'success',
       data: {
          ...instructor.toObject(),
          courses,
+         averageRating: ratingStats.averageRating,
+         totalRatings: ratingStats.totalRatings,
+         totalStudents,
       },
    });
 });

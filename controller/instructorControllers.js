@@ -7,6 +7,7 @@ import ChatGroup from '../models/chatGroupModel.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 import sendEmail from '../utils/sendEmail.js';
+import { getInstructorRatingStats } from './ratingController.js';
 
 export const requestApplication = catchAsync(async (req, res, next) => {
    const { firstname, lastname, email, phone } = req.body;
@@ -140,6 +141,9 @@ export const getInstructorDashboardStats = catchAsync(
          time: enrollment.createdAt,
       }));
 
+      // 7. Get Rating Stats for instructor's courses
+      const ratingStats = await getInstructorRatingStats(instructorId);
+
       res.status(200).json({
          status: 'success',
          data: {
@@ -150,6 +154,7 @@ export const getInstructorDashboardStats = catchAsync(
             totalStudents,
             chartData,
             recentActivity,
+            ratingStats,
          },
       });
    }
