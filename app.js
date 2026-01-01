@@ -23,6 +23,7 @@ import ablyRouter from './routes/ablyRoutes.js';
 import aiRouter from './routes/aiRoutes.js';
 import statsRouter from './routes/statsRoutes.js';
 import categoryRouter from './routes/categoryRoutes.js';
+import ratingRouter from './routes/ratingRoutes.js';
 
 //global error controller
 import globalErrorController from './middleware/errorControllers.js';
@@ -94,6 +95,9 @@ app.use('/api/stats', statsRouter);
 
 // Category Routes (public + admin protected)
 app.use('/api/categories', categoryRouter);
+
+// Rating Routes (student can rate, instructor/admin can view)
+app.use('/api/ratings', ratingRouter);
 
 app.use(globalErrorController);
 
